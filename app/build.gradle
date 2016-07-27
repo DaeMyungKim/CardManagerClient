@@ -1,21 +1,29 @@
 apply plugin: 'com.android.application'
-
+apply plugin: 'com.google.gms.google-services'
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    buildToolsVersion "24.0.1"
 
     defaultConfig {
-        applicationId "com.support.android.designlibdemo"
+        applicationId "com.cardmanager.kdml.cardmanager"
         minSdkVersion 17
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+
+        jackOptions{
+            enabled true
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
     }
 }
 
@@ -33,4 +41,6 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:1.3.0'
     compile 'com.android.support:support-v4:23.4.0'
     compile 'com.android.support:recyclerview-v7:23.4.0'
+    compile 'com.google.firebase:firebase-auth:9.0.0'
+    compile 'com.google.firebase:firebase-database:9.0.0'
 }

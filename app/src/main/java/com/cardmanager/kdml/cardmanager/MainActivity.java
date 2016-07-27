@@ -20,11 +20,17 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
                 Snackbar.make(view, "카드 정보 새로고침..", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 selectData();
+                signUpUser("tes322t@test.com","testtt");
             }
         });
 
@@ -76,6 +83,40 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
 
     }
 
+    private void signUpUser (String email,String password)
+    {
+        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        auth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(task -> {
+            if(task.isSuccessful())
+            {
+                FirebaseUser user = task.getResult().getUser();
+                User userModel = new User(user.getEmail());
+                databaseReference.child("users").child(user.getUid()).setValue(userModel);
+            }
+        }).addOnFailureListener( e ->{
+            Log.d("mstag",e.toString());
+
+        });
+    }
+
+    public class User
+    {
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String email;
+        public User(String _email)
+        {
+            email = _email;
+        }
+    }
     @Override
     protected void onResume() {
         super.onResume();
