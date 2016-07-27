@@ -19,7 +19,7 @@ public class Cards {
     public Cards(String _card_Name)
     {
         card_Name = _card_Name;
-        this_Month_Cost= 0;
+        this_Month_Cost= 0; // asdf
     }
 
     public String toString(String thisMonth)
