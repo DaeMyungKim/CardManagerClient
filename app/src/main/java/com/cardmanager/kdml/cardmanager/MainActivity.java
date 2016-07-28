@@ -267,9 +267,10 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
 
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(getSupportFragmentManager());
-        adapter.addFragment(new CardListFragment(), "카드관리");
-        adapter.addFragment(new TalkListFragment(), "매니저톡");
-        adapter.addFragment(new StatisticFragment(), "통계관리");
+        //Resource res = getResources().getstr
+        adapter.addFragment(new CardListFragment(), "sd");
+        adapter.addFragment(new TalkListFragment(), "frg_manager_talk");
+        adapter.addFragment(new StatisticFragment(), "frg_used");
         viewPager.setAdapter(adapter);
     }
 
