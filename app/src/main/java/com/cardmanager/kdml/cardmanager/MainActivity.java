@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
                 Snackbar.make(view,getResources().getString(R.string.main_refresh), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 selectData();
-                signUpUser("tes322t@test.com","testtt");
             }
         });
 
@@ -84,40 +83,6 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
 
     }
 
-    private void signUpUser (String email,String password)
-    {
-        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        auth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(task -> {
-            if(task.isSuccessful())
-            {
-                FirebaseUser user = task.getResult().getUser();
-                User userModel = new User(user.getEmail());
-                databaseReference.child("users").child(user.getUid()).setValue(userModel);
-            }
-        }).addOnFailureListener( e ->{
-            Log.d("mstag",e.toString());
-
-        });
-    }
-
-    public class User
-    {
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String email;
-        public User(String _email)
-        {
-            email = _email;
-        }
-    }
     @Override
     protected void onResume() {
         super.onResume();
@@ -249,12 +214,12 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
 
         if(requestCode == REQUEST_CODE_LOGIN){
             //Toast toast = Toast.makeText(getBaseContext(),resultCode,Toast.LENGTH_LONG);
-            Toast toast = Toast.makeText(getBaseContext(),"로그인 테스트.",Toast.LENGTH_LONG);
-            toast.show();
+            //Toast toast = Toast.makeText(getBaseContext(),"로그인 테스트.",Toast.LENGTH_LONG);
+            //toast.show();
         }
         if(requestCode == REQUEST_CODE_CARD_ADD){
-            Toast toast = Toast.makeText(getBaseContext(),"카드추가 테스트",Toast.LENGTH_LONG);
-            toast.show();
+            //Toast toast = Toast.makeText(getBaseContext(),"카드추가 테스트",Toast.LENGTH_LONG);
+            //toast.show();
         }
     }
 
