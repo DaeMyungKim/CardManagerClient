@@ -178,7 +178,8 @@ public class CustomerDatabase {
                 flg = false;
             }
             finally {
-                cs.close();
+                if(cs != null)
+                    cs.close();
             }
         }
         else if(CustomerName != null && CustomerName.length() > 0)

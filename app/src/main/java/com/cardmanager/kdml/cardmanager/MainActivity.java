@@ -71,7 +71,8 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "카드 정보 새로고침..", Snackbar.LENGTH_LONG)
+
+                Snackbar.make(view,getResources().getString(R.string.main_refresh), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 selectData();
                 signUpUser("tes322t@test.com","testtt");
@@ -209,7 +210,8 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
     public boolean onOptionsItemSelected(MenuItem item) {
         TextView te = (TextView) findViewById(R.id.userName);
         cd = CustomerDatabase.getInstance(this);
-        te.setText("사용자 이름 : "+cd.getCustomerName());
+
+        te.setText(getResources().getString(R.string.user_name)+cd.getCustomerName());
         switch (item.getItemId()) {
             case android.R.id.home:
                 mDrawerLayout.openDrawer(GravityCompat.START);
@@ -267,10 +269,9 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
 
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(getSupportFragmentManager());
-        //Resource res = getResources().getstr
-        adapter.addFragment(new CardListFragment(), "sd");
-        adapter.addFragment(new TalkListFragment(), "frg_manager_talk");
-        adapter.addFragment(new StatisticFragment(), "frg_used");
+        adapter.addFragment(new CardListFragment(), getResources().getString(R.string.frg_card_management));
+        adapter.addFragment(new TalkListFragment(), getResources().getString(R.string.frg_manager_talk));
+        adapter.addFragment(new StatisticFragment(), getResources().getString(R.string.frg_used));
         viewPager.setAdapter(adapter);
     }
 
