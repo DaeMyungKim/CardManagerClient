@@ -41,12 +41,15 @@
         </activity>
         <activity
             android:name=".LoginActivity"
-            android:label="@string/title_activity_login"
+            android:label="로그인"
             android:theme="@style/Theme.AppCompat.Dialog" />
-
-        <activity android:name=".CardAddFormActivity"
-            android:theme="@style/Theme.AppCompat.Dialog"
-            android:label="Add Card"/>
+        <activity
+            android:name=".CardAddFormActivity"
+            android:label="카드 추가"
+            android:theme="@style/Theme.AppCompat.Dialog" />
+        <activity android:name=".RegistUserActivity"
+        android:label="회원가입"
+        android:theme="@style/Theme.AppCompat.Dialog" />
     </application>
 
 </manifest>

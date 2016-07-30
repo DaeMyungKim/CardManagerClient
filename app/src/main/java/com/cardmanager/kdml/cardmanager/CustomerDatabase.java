@@ -200,6 +200,33 @@ public class CustomerDatabase {
         setTableCustomerInfo();
     }
 
+    public boolean insertSMSData(String cardName, String date, String cost)
+    {
+        try {
+            ContentValues values = new ContentValues();
+            values.put("CARD_NAME",cardName);
+            values.put("SMS_RECEIVE_DATE",date);
+            values.put("COST",cost);
+            db.insert(TABLE_CARDS,null,values);
+        } catch(Exception ex) {
+            Log.e(TAG, "Exception in insertSMSData()", ex);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean updateUserInfo(User user)
+    {
+        String UPDATE_SQL = "update " + TABLE_CUSTOMER_INFO +" set CUSTOMER_EMAIL = '" + user.getEmail() +"' CUSTOMER_NAME = '" + user.getName()+"'";
+        try {
+            db.execSQL(UPDATE_SQL);
+        } catch(Exception ex) {
+            Log.e(TAG, "Exception in UPDATE_SQL TABLE_CUSTOMER_INFO", ex);
+            return false;
+        }
+        return true;
+    }
+
     public boolean setCardInfo()
     {
         boolean flg = false;
@@ -236,7 +263,7 @@ public class CustomerDatabase {
 
     public void onUpdateDatabase()
     {
-        dbHelper.onUpgrade(db,2,2);
+        dbHelper.onUpgrade(db,1,2);
     }
 
     //// DatabaseHelper 클래스
@@ -286,17 +313,16 @@ public class CustomerDatabase {
             }
 
             // create table
-            CREATE_SQL = "create table " + TABLE_CARDS + "("
-                    + "  _id INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT, "
-                    + "  CARD_COMPANY TEXT, "
-                    + "  CARD_NAME TEXT, "
-                    + "  DATE_START TEXT, "
-                    + "  DATE_END TEXT, "
-                    + "  MONTHLY_COST INTEGER, "
-                    + "  MANAGER_CODE TEXT, "
-                    + "  MANAGER_NAME TEXT, "
-                    + "  CREATE_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP "
-                    + ")";
+            CREATE_SQL = "create table " + TABLE_CARDS +"(  " +
+                    "CARD_COMPANY TEXT," +
+                    "CARD_NAME TEXT," +
+                    "DATE_START TEXT," +
+                    "DATE_END TEXT," +
+                    "COST TEXT," +
+                    "MANAGER_CODE TEXT," +
+                    "MANAGER_NAME TEXT," +
+                    "CREATE_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                    "SMS_RECEIVE_DATE TEXT PRIMARY KEY DESC NOT NULL UNIQUE)";
             try {
                 db.execSQL(CREATE_SQL);
             } catch(Exception ex) {
@@ -315,14 +341,13 @@ public class CustomerDatabase {
             }
 
             // create table
-            CREATE_SQL = "create table " + TABLE_CARD_INFO + "("
-                    + "  CARD_COMPANY TEXT, "
-                    + "  CARD_NAME TEXT, "
-                    + "  CARD_TEL_NUM TEXT"
-                    + "  DATE_UPDATE TEXT, "
-                    + "  PARSING_RULE TEXT, "
-                    + "  CREATE_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP "
-                    + ")";
+            CREATE_SQL = "create table " + TABLE_CARD_INFO +"(  " +
+                    "CARD_COMPANY TEXT,   " +
+                    "CARD_NAME TEXT,   " +
+                    "CARD_TEL_NUM TEXT  " +
+                    "DATE_UPDATE TEXT,   " +
+                    "PARSING_RULE TEXT,   " +
+                    "CREATE_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP )";
             try {
                 db.execSQL(CREATE_SQL);
                 insertCardInfo();

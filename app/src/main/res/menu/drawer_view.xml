@@ -38,7 +38,8 @@
         <item
             android:id="@+id/nav_del_card"
             android:icon="@drawable/ic_forum"
-            android:title="카드 삭제" />
+            android:title="회원 가입"
+            android:onClick="onClickRegistUser"/>
     </group>
 
     <item android:title="추가 기능">

@@ -14,8 +14,17 @@ public class User {
     }
 
     public String email;
+    public String name;
     public User(String _email)
     {
         email = _email;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

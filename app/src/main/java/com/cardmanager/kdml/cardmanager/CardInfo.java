@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class CardInfo {
         card_Tell_Num = cs.getString(cs.getColumnIndex("CARD_TEL_NUM"));
         Calendar cal = Calendar.getInstance();
         thisMonth = cal.get(Calendar.MONTH)+1;
+
     }
 
     public void setSMSData(ContentResolver cr)
@@ -61,205 +63,219 @@ public class CardInfo {
         while(it.hasNext())
         {
             Cards cds = it.next();
-            String sss = cds.getCard_Name()+" "+thisMonth+"Ïõî ÏÇ¨Ïö©Í∏àÏï° : "+fmt.format(cds.getThis_Month_Cost())+"Ïõê";
+            String sss = cds.getCard_Name()+" "+thisMonth+"ø˘ ªÁøÎ±›æ◊ : "+fmt.format(cds.getThis_Month_Cost())+"ø¯";
             Cards.idsArrList.add(sss);
         }
 
         c.close();
     }
 
-    public void getCardCostData(Cursor c,int thisMonth,String strAdd)
-    {
-        Calendar cal = Calendar.getInstance();
-        long origin = (long)Double.parseDouble( c.getString(c.getColumnIndex("date")));
-        cal.setTimeInMillis(origin);
-        int yyyy = cal.get(Calendar.YEAR);
-        int MM = (cal.get(Calendar.MONTH)+1);
-        int dd = cal.get(Calendar.DATE);
-        int HH = cal.get(Calendar.HOUR);
-        int mm = cal.get(Calendar.MINUTE);
-        int ss =cal.get(Calendar.SECOND);
+    public void getCardCostData(Cursor c,int thisMonth,String strAdd) {
+        try {
+            Calendar cal = Calendar.getInstance();
+            long origin = (long) Double.parseDouble(c.getString(c.getColumnIndex("date")));
+            cal.setTimeInMillis(origin);
+            int yyyy = cal.get(Calendar.YEAR);
+            int MM = (cal.get(Calendar.MONTH) + 1);
+            int dd = cal.get(Calendar.DATE);
+            int HH = cal.get(Calendar.HOUR);
+            int mm = cal.get(Calendar.MINUTE);
+            int ss = cal.get(Calendar.SECOND);
 
-        if(thisMonth == MM) {
-            String str = c.getString(c.getColumnIndex("body"));
-            if (strAdd.equals("15776200")) { // ÌòÑÎåÄ
-                String[] spl = str.split("\\n");
-                String cardName = spl[1].substring(0,spl[1].indexOf(" "));
-                String won = spl[3].substring(0, spl[3].indexOf("Ïõê")).replace(",", "");
-                long sumWon = (long) Double.parseDouble(won);
-                if(map.containsKey(cardName))
-                {
-                    Cards cds = map.get(cardName);
-                    cds.setThis_Month_Cost(cds.getThis_Month_Cost()+sumWon);
+            if (thisMonth == MM) {
+                String str = c.getString(c.getColumnIndex("body"));
+                if (strAdd.equals("15776200")) { // «ˆ¥Î
+                    String[] spl = str.split("\\n");
+                    //Log.e("CardManagerClient", spl[0]+"-"+spl[1]+"-"+spl[2]+"-"+spl[3]);
+                    //String won = spl[3].substring(0, spl[3].indexOf("ø¯")).replace(",", "");
+                    String won = getNum(spl[3]);
+                    String cardName = spl[1].substring(0, spl[1].indexOf(" "));
+                    long sumWon = (long) Double.parseDouble(won);
+                    if (map.containsKey(cardName)) {
+                        Cards cds = map.get(cardName);
+                        cds.setThis_Month_Cost(cds.getThis_Month_Cost() + sumWon);
+                    } else {
+                        Cards nCds = new Cards(cardName);
+                        nCds.setThis_Month_Cost(nCds.getThis_Month_Cost() + sumWon);
+                        map.put(cardName, nCds);
+                    }
                 }
-                else
-                {
-                    Cards nCds = new Cards(cardName);
-                    nCds.setThis_Month_Cost(nCds.getThis_Month_Cost()+sumWon);
-                    map.put(cardName,nCds);
-                }
-            }
-            if (strAdd.equals("15447200")) { // Ïã†Ìïú
-                String[] spl2 = str.split(" ");
-                String won = spl2[4].substring(spl2[4].indexOf(")")+1, spl2[4].indexOf("Ïõê")).replace(",", "");
-                String cardName = "Ïã†ÌïúÏπ¥Îìú "+spl2[1];
-                long sumWon = (long) Double.parseDouble(won);
-                if(map.containsKey(cardName))
-                {
-                    Cards cds = map.get(cardName);
-                    cds.setThis_Month_Cost(cds.getThis_Month_Cost()+sumWon);
-                }
-                else
-                {
-                    Cards nCds = new Cards(cardName);
-                    nCds.setThis_Month_Cost(nCds.getThis_Month_Cost()+sumWon);
-                    map.put(cardName,nCds);
-                }
-            }
+                if (strAdd.equals("15447200")) { // Ω≈«—
+                    String[] spl2 = str.split(" ");
+                    //Log.e("CardManagerClient", spl2[0]+"-"+spl2[1]+"-"+spl2[2]+"-"+spl2[3]+"-"+spl2[4]);
+                    //String won = spl2[4].substring(spl2[4].indexOf(")") + 1, spl2[4].indexOf("ø¯")).replace(",", "");
+                    String won = getNum(spl2[4]);
+                    String cardName = "Ω≈«—ƒ´µÂ " + spl2[1];
+                    long sumWon = (long) Double.parseDouble(won);
+                    if (map.containsKey(cardName)) {
+                        Cards cds = map.get(cardName);
+                        cds.setThis_Month_Cost(cds.getThis_Month_Cost() + sumWon);
+                    } else {
+                        Cards nCds = new Cards(cardName);
+                        nCds.setThis_Month_Cost(nCds.getThis_Month_Cost() + sumWon);
+                        map.put(cardName, nCds);
+                    }
 
-            String date = yyyy + "/" + MM + "/" + dd + " " + HH + ":" + mm + ":" + ss + "";
-            Log.d("shue", "body:" + str);
-            Log.d("shue", "date:" + date);
-            Log.d("shue", "type:" + c.getString(c.getColumnIndex("type")));
-            Log.d("shue", "address:" + c.getString(c.getColumnIndex("address")));
+                   // CustomerDatabase.getInstance(null).insertSMSData(cardName,c.getString(c.getColumnIndex("date")),won);
+                }
+
+                String date = yyyy + "/" + MM + "/" + dd + " " + HH + ":" + mm + ":" + ss + "";
+                Log.d("shue", "body:" + str);
+                Log.e("shue", "date(origin):" + c.getString(c.getColumnIndex("date")));
+                Log.d("shue", "date:" + date);
+                Log.d("shue", "type:" + c.getString(c.getColumnIndex("type")));
+                Log.d("shue", "address:" + c.getString(c.getColumnIndex("address")));
+            }
+        } catch (Exception ex) {
+            Log.e("CardManagerClient", "Exception in getCardCostData()", ex);
         }
+    }
 
+    public String getNum(String strs)
+    {
+        String won="";
+        for (int i = 0; i < strs.length(); i++) {
+            char ch = strs.charAt(i);
+            if ("0123456789".contains(ch + ""))
+                won += strs.charAt(i);
+        }
+        return won;
     }
 
     public static final String[][] cardInfo= {
-            {"ÌòÑÎåÄ","ZERO"},
-            {"ÌòÑÎåÄ","X"},
-            {"ÌòÑÎåÄ","X2"},
-            {"ÌòÑÎåÄ","X3"},
-            {"ÌòÑÎåÄ","M"},
-            {"ÌòÑÎåÄ","M2"},
-            {"ÌòÑÎåÄ","M3"},
-            {"ÌòÑÎåÄ","RED"},
-            {"ÌòÑÎåÄ","PURPLE"},
-            {"ÌòÑÎåÄ","BLACK"},
-            {"ÌòÑÎåÄ","T3"},
-            {"ÌòÑÎåÄ","Ïù¥ÎßàÌä∏ eÏπ¥Îìú"},
-            {"ÌòÑÎåÄ","Í∏∞ÌÉÄÏ†úÌú¥Ïπ¥Îìú"},
-            {"Ïã†Ìïú","Cube"},
-            {"Ïã†Ìïú","Tasty"},
-            {"Ïã†Ìïú","Mr.Life"},
-            {"Ïã†Ìïú","Ï£ºÍ±∞ÎûòÏã†Ïö©"},
-            {"Ïã†Ìïú","ÎØ∏ÎûòÏÑ§Í≥Ñ"},
-            {"Ïã†Ìïú","Air Platinum"},
-            {"Ïã†Ìïú","Shopping"},
-            {"Ïã†Ìïú","B.Big"},
-            {"Ïã†Ìïú","LOVE"},
-            {"Ïã†Ìïú","The ACE"},
-            {"Ïã†Ìïú","BEST-F"},
-            {"Ïã†Ìïú","CLASSIC+"},
-            {"Ïã†Ìïú","LADY CLASSIC"},
-            {"Ïã†Ìïú","CLASSIC-Y"},
-            {"Ïã†Ìïú","RPM+ Platinum"},
-            {"Ïã†Ìïú","Cube Platinum"},
-            {"Ïã†Ìïú","Love Platinum"},
-            {"Ïã†Ìïú","Simple"},
-            {"Ïã†Ìïú","Simple Platinum"},
-            {"Ïã†Ìïú","Lesson Platinum"},
-            {"Ïã†Ìïú","23.5"},
-            {"Ïã†Ìïú","Hi-Point Nano F"},
-            {"Ïã†Ìïú","ÏïÑÏù¥ÌñâÎ≥µ(Î≥¥Ïú°Î£å)"},
-            {"ÏÇºÏÑ±","Íµ≠ÎØºÌñâÎ≥µ(ÏûÑÏã†,Ï∂úÏÇ∞)"},
-            {"ÏÇºÏÑ±","2v2"},
-            {"ÏÇºÏÑ±","3v2 / 3+v2"},
-            {"ÏÇºÏÑ±","4v2 / 4+v2 / BIZ"},
-            {"ÏÇºÏÑ±","5v2"},
-            {"ÏÇºÏÑ±","6v2 / BIZ"},
-            {"ÏÇºÏÑ±","7v2 / 7+v2"},
-            {"ÏÇºÏÑ±","THE 1 / Ïä§Ïπ¥Ïù¥Ìå®Ïä§ / BIZ"},
-            {"ÏÇºÏÑ±","ÏïÑÏãúÏïÑÎÇò Ïï†ÎãàÌå®Ïä§"},
-            {"ÏÇºÏÑ±","ÏïÑÎß§Î¶¨Ïπ∏ ÏùµÏä§ÌîÑÎ†àÏä§ Platinum"},
-            {"ÏÇºÏÑ±","THE O"},
-            {"ÏÇºÏÑ±","ÏïÑÏãúÏïÑÎÇò ÏßÄÏóîÎØ∏"},
-            {"ÏÇºÏÑ±","ÏïÑÎ©ïÏä§ Í≥®Îìú"},
-            {"ÏÇºÏÑ±","ÏïÑÎ©ïÏä§ Î∏îÎ£®"},
-            {"ÏÇºÏÑ±","Ïä§Ïπ¥Ïù¥Ìå®Ïä§"},
-            {"ÏÇºÏÑ±","Ïä§ÌéòÏÖúÎßàÏùºÎ¶¨ÏßÄ(Ïä§Ïπ¥Ïù¥Ìå®Ïä§)"},
-            {"ÏÇºÏÑ±","taptap S"},
-            {"ÏÇºÏÑ±","taptap O"},
-            {"KBÍµ≠ÎØº","ÍµøÎç∞Ïù¥"},
-            {"KBÍµ≠ÎØº","ÌååÏù∏ÌÖåÌÅ¨"},
-            {"KBÍµ≠ÎØº","Îã§Îã¥"},
-            {"KBÍµ≠ÎØº","Í∞ÄÏò®"},
-            {"KBÍµ≠ÎØº","Ï≤≠Ï∂òÎåÄÎ°ú"},
-            {"KBÍµ≠ÎØº","ÍµøÎç∞Ïù¥Ïò¨Î¶º"},
-            {"KBÍµ≠ÎØº","ÎàÑÎ¶¨"},
-            {"KBÍµ≠ÎØº","ÏôÄÏù¥Ï¶àÏò¨Î¶º"},
-            {"KBÍµ≠ÎØº","Ìõà"},
-            {"KBÍµ≠ÎØº","ÎØº"},
-            {"KBÍµ≠ÎØº","Ï†ï"},
-            {"KBÍµ≠ÎØº","Ïùå"},
-            {"KBÍµ≠ÎØº","ÌòúÎã¥"},
-            {"KBÍµ≠ÎØº","ÌòúÎã¥2"},
-            {"KBÍµ≠ÎØº","ÏôÄÏù¥Ï¶à"},
-            {"KBÍµ≠ÎØº","ÍµøÏáºÌïë"},
-            {"KBÍµ≠ÎØº","Ïä§ÌÉÄÎß•Ïä§"},
-            {"KBÍµ≠ÎØº","ÎØ∏Î•¥"},
-            {"KBÍµ≠ÎØº","ÏïÑÏù¥ÌñâÎ≥µ"},
-            {"Î°ØÎç∞","ÎìúÎùºÏù¥ÎπôÌå®Ïä§"},
-            {"Î°ØÎç∞","DCÌå®Ïä§"},
-            {"Î°ØÎç∞","VEEX"},
-            {"Î°ØÎç∞","ÏïÑÏù¥ÌñâÎ≥µ"},
-            {"Î°ØÎç∞","Ïò¨ÎßàÏù¥ÏáºÌïë ÍµêÌÜµ/ÌÜµÏã†/Ìï¥Ïô∏/Ï†êÏã¨"},
-            {"Î°ØÎç∞","Ìè¨Ïù∏Ìä∏ÌîåÎü¨Ïä§"},
-            {"Î°ØÎç∞","ÌîåÎü¨Ïä§Ìè¨ÌÖê"},
-            {"Î°ØÎç∞","DCÏäàÌîÑÎ¶º"},
-            {"Î°ØÎç∞","DCÏä§ÎßàÌä∏"},
-            {"Î°ØÎç∞","Ìà¨Ïù∏Ïõê"},
-            {"Î°ØÎç∞","Ïä§Ïπ¥Ïù¥Ìå®Ïä§ Î°ØÎç∞Í≥®ÎìúÏïÑÎ©ïÏä§"},
-            {"Î°ØÎç∞","Î°ØÎç∞ Îç∞ÏùºÎ¶¨"},
-            {"Î°ØÎç∞","Î≤°Ïä§ ÌîåÎûòÌã∞ÎÑò"},
-            {"Î°ØÎç∞","DCÌÅ¥Î¶≠"},
-            {"Î°ØÎç∞","DCÌîåÎü¨Ïä§"},
-            {"Î°ØÎç∞","DCÏä§ÏúÑÌä∏"},
-            {"Î°ØÎç∞","ÏòµÌã¥ ÌîåÎûòÌã∞ÎÑò"},
-            {"Î°ØÎç∞","Íµ≠ÎØºÌñâÎ≥µ(ÏûÑÏã†,Ï∂úÏÇ∞)"},
-            {"Ïî®Ìã∞","ÌÅ¥Î¶¨Ïñ¥"},
-            {"Ïî®Ìã∞","Î¶¨ÏõåÎìú"},
-            {"Ïî®Ìã∞","ÌîÑÎ¶¨ÎØ∏Ïñ¥ÎßàÏùº"},
-            {"Ïî®Ìã∞","ÌîÑÎ¶¨Ïä§Ìã∞ÏßÄ"},
-            {"Ïî®Ìã∞","Î©ÄÌã∞ÌîåÎü¨Ïä§"},
-            {"ÎÜçÌòë","Ïä§ÎßàÌã∞"},
-            {"ÎÜçÌòë","Î≤†Ïù¥ÏßÅ"},
-            {"ÎÜçÌòë","ÏÉµÌïë / ÏÉµÌïë+"},
-            {"ÎÜçÌòë","Ïò¨Ïõê"},
-            {"ÎÜçÌòë","ÏãúÎüΩ"},
-            {"ÎÜçÌòë","Ï†êÏ†ê"},
-            {"ÎÜçÌòë","ÌÖåÏù¥ÌÅ¨5"},
-            {"ÎÜçÌòë","ÏïÑÏù¥ÌñâÎ≥µ(Î≥¥Ïú°Î£å)"},
-            {"ÎÜçÌòë","ÏáºÌïëÏÑ∏Ïù¥Î∏å"},
-            {"ÎÜçÌòë","ÌïòÎÇòÎ°ú"},
-            {"ÎÜçÌòë","Î†àÏù¥Îîî Îã§ÏÜú"},
-            {"ÎÜçÌòë","ME / ME+"},
-            {"ÎÜçÌòë","Íµ≠ÎØºÌñâÎ≥µ(ÏûÑÏã†,Ï∂úÏÇ∞)"},
-            {"ÎÜçÌòë","ÏúÑ"},
-            {"ÌïòÎÇò","ÌÅ¥ÎüΩ SK"},
-            {"ÌïòÎÇò","2X ÏïåÌåå/Í∞êÎßà/ÏãúÍ∑∏Îßà"},
-            {"ÌïòÎÇò","ÌÑ∞ÏπòÏõê"},
-            {"ÌïòÎÇò","ÎπÑÎ∞îG"},
-            {"ÌïòÎÇò","ÌÅ¨Î°úÏä§ÎßàÏùº"},
-            {"ÌïòÎÇò","ÏãúÍ∑∏ÎãàÏ≤ò"},
-            {"ÌïòÎÇò","POP"},
-            {"ÌïòÎÇò","ÏïÑÏù¥ÌñâÎ≥µ(Î≥¥Ïú°Î£å)"},
-            {"ÌïòÎÇò","Ïä§ÎßàÌä∏ DC"},
-            {"ÌïòÎÇò","ÎØ∏ÏÉù"},
-            {"ÌïòÎÇò","ÏÉùÌôúÏùò Îã¨Ïù∏"},
-            {"ÌïòÎÇò","Sync"},
-            {"ÌïòÎÇò","ÌïòÎÇòÎß¥Î≤ÑÏä§ 1Q"},
-            {"ÌïòÎÇò","ÎπÖÌåü"},
-            {"ÌïòÎÇò","ÏãùÏÉ§"},
-            {"Ïö∞Î¶¨","Í∞Ä"},
-            {"Ïö∞Î¶¨","ÎÇò"},
-            {"Ïö∞Î¶¨","Îã§"},
-            {"Ïö∞Î¶¨","Îùº"},
-            {"Ïö∞Î¶¨","NEW Ïö∞Î¶¨V"},
-            {"Ïö∞Î¶¨","Î∏îÎ£®Îã§Ïù¥ÏïÑÎ™¨Îìú"},
-            {"Ïö∞Î¶¨","Î°úÏñÑÎ∏îÎ£®"},
-            {"Ïö∞Î¶¨","ÏïÑÏù¥ÌñâÎ≥µ(Î≥¥Ïú°Î£å)"}
+            {"«ˆ¥Î","ZERO"},
+            {"«ˆ¥Î","X"},
+            {"«ˆ¥Î","X2"},
+            {"«ˆ¥Î","X3"},
+            {"«ˆ¥Î","M"},
+            {"«ˆ¥Î","M2"},
+            {"«ˆ¥Î","M3"},
+            {"«ˆ¥Î","RED"},
+            {"«ˆ¥Î","PURPLE"},
+            {"«ˆ¥Î","BLACK"},
+            {"«ˆ¥Î","T3"},
+            {"«ˆ¥Î","¿Ã∏∂∆Æ eƒ´µÂ"},
+            {"«ˆ¥Î","±‚≈∏¡¶»ﬁƒ´µÂ"},
+            {"Ω≈«—","Cube"},
+            {"Ω≈«—","Tasty"},
+            {"Ω≈«—","Mr.Life"},
+            {"Ω≈«—","¡÷∞≈∑°Ω≈øÎ"},
+            {"Ω≈«—","πÃ∑°º≥∞Ë"},
+            {"Ω≈«—","Air Platinum"},
+            {"Ω≈«—","Shopping"},
+            {"Ω≈«—","B.Big"},
+            {"Ω≈«—","LOVE"},
+            {"Ω≈«—","The ACE"},
+            {"Ω≈«—","BEST-F"},
+            {"Ω≈«—","CLASSIC+"},
+            {"Ω≈«—","LADY CLASSIC"},
+            {"Ω≈«—","CLASSIC-Y"},
+            {"Ω≈«—","RPM+ Platinum"},
+            {"Ω≈«—","Cube Platinum"},
+            {"Ω≈«—","Love Platinum"},
+            {"Ω≈«—","Simple"},
+            {"Ω≈«—","Simple Platinum"},
+            {"Ω≈«—","Lesson Platinum"},
+            {"Ω≈«—","23.5"},
+            {"Ω≈«—","Hi-Point Nano F"},
+            {"Ω≈«—","æ∆¿Ã«‡∫π(∫∏¿∞∑·)"},
+            {"ªÔº∫","±ππŒ«‡∫π(¿”Ω≈,√‚ªÍ)"},
+            {"ªÔº∫","2v2"},
+            {"ªÔº∫","3v2 / 3+v2"},
+            {"ªÔº∫","4v2 / 4+v2 / BIZ"},
+            {"ªÔº∫","5v2"},
+            {"ªÔº∫","6v2 / BIZ"},
+            {"ªÔº∫","7v2 / 7+v2"},
+            {"ªÔº∫","THE 1 / Ω∫ƒ´¿Ã∆–Ω∫ / BIZ"},
+            {"ªÔº∫","æ∆Ω√æ∆≥™ æ÷¥œ∆–Ω∫"},
+            {"ªÔº∫","æ∆∏≈∏Æƒ≠ ¿ÕΩ∫«¡∑πΩ∫ Platinum"},
+            {"ªÔº∫","THE O"},
+            {"ªÔº∫","æ∆Ω√æ∆≥™ ¡ˆø£πÃ"},
+            {"ªÔº∫","æ∆∏ﬂΩ∫ ∞ÒµÂ"},
+            {"ªÔº∫","æ∆∏ﬂΩ∫ ∫Ì∑Á"},
+            {"ªÔº∫","Ω∫ƒ´¿Ã∆–Ω∫"},
+            {"ªÔº∫","Ω∫∆‰º»∏∂¿œ∏Æ¡ˆ(Ω∫ƒ´¿Ã∆–Ω∫)"},
+            {"ªÔº∫","taptap S"},
+            {"ªÔº∫","taptap O"},
+            {"KB±ππŒ","±¬µ•¿Ã"},
+            {"KB±ππŒ","∆ƒ¿Œ≈◊≈©"},
+            {"KB±ππŒ","¥Ÿ¥„"},
+            {"KB±ππŒ","∞°ø¬"},
+            {"KB±ππŒ","√ª√·¥Î∑Œ"},
+            {"KB±ππŒ","±¬µ•¿Ãø√∏≤"},
+            {"KB±ππŒ","¥©∏Æ"},
+            {"KB±ππŒ","øÕ¿Ã¡Óø√∏≤"},
+            {"KB±ππŒ","»∆"},
+            {"KB±ππŒ","πŒ"},
+            {"KB±ππŒ","¡§"},
+            {"KB±ππŒ","¿Ω"},
+            {"KB±ππŒ","«˝¥„"},
+            {"KB±ππŒ","«˝¥„2"},
+            {"KB±ππŒ","øÕ¿Ã¡Ó"},
+            {"KB±ππŒ","±¬ºÓ«Œ"},
+            {"KB±ππŒ","Ω∫≈∏∏∆Ω∫"},
+            {"KB±ππŒ","πÃ∏£"},
+            {"KB±ππŒ","æ∆¿Ã«‡∫π"},
+            {"∑‘µ•","µÂ∂Û¿Ã∫˘∆–Ω∫"},
+            {"∑‘µ•","DC∆–Ω∫"},
+            {"∑‘µ•","VEEX"},
+            {"∑‘µ•","æ∆¿Ã«‡∫π"},
+            {"∑‘µ•","ø√∏∂¿ÃºÓ«Œ ±≥≈Î/≈ÎΩ≈/«ÿø‹/¡°Ω…"},
+            {"∑‘µ•","∆˜¿Œ∆Æ«√∑ØΩ∫"},
+            {"∑‘µ•","«√∑ØΩ∫∆˜≈Ÿ"},
+            {"∑‘µ•","DCΩ¥«¡∏≤"},
+            {"∑‘µ•","DCΩ∫∏∂∆Æ"},
+            {"∑‘µ•","≈ı¿Œø¯"},
+            {"∑‘µ•","Ω∫ƒ´¿Ã∆–Ω∫ ∑‘µ•∞ÒµÂæ∆∏ﬂΩ∫"},
+            {"∑‘µ•","∑‘µ• µ•¿œ∏Æ"},
+            {"∑‘µ•","∫§Ω∫ «√∑°∆º≥—"},
+            {"∑‘µ•","DC≈¨∏Ø"},
+            {"∑‘µ•","DC«√∑ØΩ∫"},
+            {"∑‘µ•","DCΩ∫¿ß∆Æ"},
+            {"∑‘µ•","ø…∆æ «√∑°∆º≥—"},
+            {"∑‘µ•","±ππŒ«‡∫π(¿”Ω≈,√‚ªÍ)"},
+            {"ææ∆º","≈¨∏ÆæÓ"},
+            {"ææ∆º","∏ÆøˆµÂ"},
+            {"ææ∆º","«¡∏ÆπÃæÓ∏∂¿œ"},
+            {"ææ∆º","«¡∏ÆΩ∫∆º¡ˆ"},
+            {"ææ∆º","∏÷∆º«√∑ØΩ∫"},
+            {"≥Û«˘","Ω∫∏∂∆º"},
+            {"≥Û«˘","∫£¿Ã¡˜"},
+            {"≥Û«˘","º•«Œ / º•«Œ+"},
+            {"≥Û«˘","ø√ø¯"},
+            {"≥Û«˘","Ω√∑¥"},
+            {"≥Û«˘","¡°¡°"},
+            {"≥Û«˘","≈◊¿Ã≈©5"},
+            {"≥Û«˘","æ∆¿Ã«‡∫π(∫∏¿∞∑·)"},
+            {"≥Û«˘","ºÓ«Œºº¿Ã∫Í"},
+            {"≥Û«˘","«œ≥™∑Œ"},
+            {"≥Û«˘","∑π¿Ãµ ¥Ÿºÿ"},
+            {"≥Û«˘","ME / ME+"},
+            {"≥Û«˘","±ππŒ«‡∫π(¿”Ω≈,√‚ªÍ)"},
+            {"≥Û«˘","¿ß"},
+            {"«œ≥™","≈¨∑¥ SK"},
+            {"«œ≥™","2X æÀ∆ƒ/∞®∏∂/Ω√±◊∏∂"},
+            {"«œ≥™","≈Õƒ°ø¯"},
+            {"«œ≥™","∫ÒπŸG"},
+            {"«œ≥™","≈©∑ŒΩ∫∏∂¿œ"},
+            {"«œ≥™","Ω√±◊¥œ√≥"},
+            {"«œ≥™","POP"},
+            {"«œ≥™","æ∆¿Ã«‡∫π(∫∏¿∞∑·)"},
+            {"«œ≥™","Ω∫∏∂∆Æ DC"},
+            {"«œ≥™","πÃª˝"},
+            {"«œ≥™","ª˝»∞¿« ¥ﬁ¿Œ"},
+            {"«œ≥™","Sync"},
+            {"«œ≥™","«œ≥™∏…πˆΩ∫ 1Q"},
+            {"«œ≥™","∫Ú∆Ã"},
+            {"«œ≥™","Ωƒª˛"},
+            {"øÏ∏Æ","∞°"},
+            {"øÏ∏Æ","≥™"},
+            {"øÏ∏Æ","¥Ÿ"},
+            {"øÏ∏Æ","∂Û"},
+            {"øÏ∏Æ","NEW øÏ∏ÆV"},
+            {"øÏ∏Æ","∫Ì∑Á¥Ÿ¿Ãæ∆∏ÛµÂ"},
+            {"øÏ∏Æ","∑Œæ‚∫Ì∑Á"},
+            {"øÏ∏Æ","æ∆¿Ã«‡∫π(∫∏¿∞∑·)"}
     };
 
 

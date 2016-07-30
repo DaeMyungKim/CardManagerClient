@@ -358,6 +358,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             } catch (InterruptedException e) {
                 return false;
             }
+            CustomerDatabase cd = CustomerDatabase.getInstance(null);
 
             for (String credential : DUMMY_CREDENTIALS) {
                 String[] pieces = credential.split(":");

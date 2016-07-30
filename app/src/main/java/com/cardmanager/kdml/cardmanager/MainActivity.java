@@ -1,6 +1,4 @@
 package com.cardmanager.kdml.cardmanager;
-
-
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
@@ -37,7 +35,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements StatisticFragment.OnFragmentInteractionListener, TalkListFragment.OnFragmentInteractionListener
 {
-
     private DrawerLayout mDrawerLayout;
     String dbName = "mmssms.db";
     ViewPager viewPager;
@@ -46,7 +43,6 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -98,50 +94,25 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
 
     public void selectData()
     {
-        try{
-            //Cursor result = cr.query(Uri.parse("content://sms"),null, null, null, null);
-            /*String sql = "select DATETIME(substr(date,1,10),'UNIXEPOCH','LOCALTIME' as date, address," +
-                "case type when '1' then Receive" +
-                "when '2' then 'send'" +
-                "else type" +
-                "end as Type, body" +
-                "from sms" +
-                "order by date desc";*/
-            /*
-            result.moveToFirst();
-            while(!result.isAfterLast()){
-                arr_id_list.add(result.getString(0));
-                arrlist.add(result.getString(1));
-                result.moveToNext();
-            }
-            result.close();*/
+        //Cursor result = database.rawQuery(sql, null);
+        // query(uri, projection(data column명), selection(조건절), selectionArgs(selection 에 ? 가 있을 경우 값 치환), sort order)
+        /* String[] projection = new String[]
+        {
+        People._ID,
+        People._COUNT
+        };
 
-            //Cursor result = database.rawQuery(sql, null);
-            // query(uri, projection(data column명), selection(조건절), selectionArgs(selection 에 ? 가 있을 경우 값 치환), sort order)
-            /* String[] projection = new String[]
-            {
-            People._ID,
-            People._COUNT
-            };
-
-            String sortOrder = People._COUNT + "ASC";
-            * */
-
-            Cards.idsArrList.clear();
-            ContentResolver cr = getContentResolver();
-            for(int i = 0; i < cd.getCardInfoArrayList().size();i++)
-            {
-                CardInfo ci = cd.getCardInfoArrayList().get(i);
-                ci.setSMSData(cr);
-
-            }
-
-            setupViewPager(viewPager);
+        String sortOrder = People._COUNT + "ASC";
+        * */
+        Cards.idsArrList.clear();
+        ContentResolver cr = getContentResolver();
+        for(int i = 0; i < cd.getCardInfoArrayList().size();i++)
+        {
+            CardInfo ci = cd.getCardInfoArrayList().get(i);
+            ci.setSMSData(cr);
 
         }
-        catch(Exception ex) {
-            Toast.makeText(this, ex.toString(), Toast.LENGTH_LONG);
-        }
+        setupViewPager(viewPager);
     }
 
     @Override
@@ -171,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
 
     public static final int REQUEST_CODE_LOGIN = 1;
     public static final int REQUEST_CODE_CARD_ADD = 2;
+    public static final int REQUEST_CODE_REGIST_USER = 3;
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         TextView te = (TextView) findViewById(R.id.userName);
@@ -212,14 +184,24 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
     protected void onActivityResult(int requestCode,int resultCode,Intent Data){
         super.onActivityResult(requestCode,resultCode,Data);
 
-        if(requestCode == REQUEST_CODE_LOGIN){
-            //Toast toast = Toast.makeText(getBaseContext(),resultCode,Toast.LENGTH_LONG);
-            //Toast toast = Toast.makeText(getBaseContext(),"로그인 테스트.",Toast.LENGTH_LONG);
-            //toast.show();
-        }
-        if(requestCode == REQUEST_CODE_CARD_ADD){
-            //Toast toast = Toast.makeText(getBaseContext(),"카드추가 테스트",Toast.LENGTH_LONG);
-            //toast.show();
+        switch (requestCode)
+        {
+            case REQUEST_CODE_LOGIN:
+                break;
+            case REQUEST_CODE_CARD_ADD:
+                break;
+            case REQUEST_CODE_REGIST_USER:
+                if(resultCode == RESULT_OK)
+                {
+                    int i = Data.getExtras().getInt("data");
+                    if(i == 1)
+                    {
+                        Toast toast = Toast.makeText(getBaseContext(),getResources().getText(R.string.main_message1),Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+                }
+
+                break;
         }
     }
 
@@ -260,6 +242,11 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
     public void onClickAddCard(MenuItem item) {
         Intent intent = new Intent(getBaseContext(),CardAddFormActivity.class);
         startActivityForResult(intent,REQUEST_CODE_CARD_ADD);
+    }
+
+    public void onClickRegistUser(MenuItem item) {
+        Intent intent = new Intent(getBaseContext(),RegistUserActivity.class);
+        startActivityForResult(intent,REQUEST_CODE_REGIST_USER);
     }
 
 
