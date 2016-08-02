@@ -47,9 +47,12 @@
             android:name=".CardAddFormActivity"
             android:label="카드 추가"
             android:theme="@style/Theme.AppCompat.Dialog" />
-        <activity android:name=".RegistUserActivity"
-        android:label="회원가입"
-        android:theme="@style/Theme.AppCompat.Dialog" />
+        <activity
+            android:name=".RegistUserActivity"
+            android:label="회원가입"
+            android:theme="@style/Theme.AppCompat.Dialog" />
+        <activity android:name=".BaseActivity" />
+        <activity android:name=".EmailPasswordActivity"/>
     </application>
 
 </manifest>

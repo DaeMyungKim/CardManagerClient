@@ -235,7 +235,8 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
     }
 
     public void onClickLogin(MenuItem item) {
-        Intent intent = new Intent(getBaseContext(),LoginActivity.class);
+        //Intent intent = new Intent(getBaseContext(),LoginActivity.class);
+        Intent intent = new Intent(getBaseContext(),EmailPasswordActivity.class);
         startActivityForResult(intent,REQUEST_CODE_LOGIN);
     }
 
@@ -245,7 +246,8 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
     }
 
     public void onClickRegistUser(MenuItem item) {
-        Intent intent = new Intent(getBaseContext(),RegistUserActivity.class);
+        Intent intent = new Intent(getBaseContext(),EmailPasswordActivity.class);
+        //Intent intent = new Intent(getBaseContext(),RegistUserActivity.class);
         startActivityForResult(intent,REQUEST_CODE_REGIST_USER);
     }
 
