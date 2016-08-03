@@ -63,7 +63,7 @@ public class CardInfo {
         while(it.hasNext())
         {
             Cards cds = it.next();
-            String sss = cds.getCard_Name()+" "+thisMonth+"¿ù »ç¿ë±İ¾× : "+fmt.format(cds.getThis_Month_Cost())+"¿ø";
+            String sss = cds.getCard_Name()+" "+thisMonth+"ì›” ì‚¬ìš©ê¸ˆì•¡ : "+fmt.format(cds.getThis_Month_Cost())+"ì›";
             Cards.idsArrList.add(sss);
         }
 
@@ -73,7 +73,8 @@ public class CardInfo {
     public void getCardCostData(Cursor c,int thisMonth,String strAdd) {
         try {
             Calendar cal = Calendar.getInstance();
-            long origin = (long) Double.parseDouble(c.getString(c.getColumnIndex("date")));
+            String date = c.getString(c.getColumnIndex("date"));
+            long origin = (long) Double.parseDouble(date);
             cal.setTimeInMillis(origin);
             int yyyy = cal.get(Calendar.YEAR);
             int MM = (cal.get(Calendar.MONTH) + 1);
@@ -81,51 +82,42 @@ public class CardInfo {
             int HH = cal.get(Calendar.HOUR);
             int mm = cal.get(Calendar.MINUTE);
             int ss = cal.get(Calendar.SECOND);
+            String cardName = "",won = "";
+            String str = c.getString(c.getColumnIndex("body"));
+            long sumWon=0;
+            if (strAdd.equals("15776200")) { // í˜„ëŒ€ì¹´ë“œ
+                String[] spl = str.split("\\n");
+                won = getNum(spl[3]);
+                cardName = spl[1].substring(0, spl[1].indexOf(" "));
+                sumWon = (long) Double.parseDouble(won);
+            }
+            if (strAdd.equals("15447200")) { // ì‹ í•œì¹´ë“œ
+                String[] spl2 = str.split(" ");
+                won = getNum(spl2[4]);
+                cardName = "ì‹ í•œì¹´ë“œ " + spl2[1];
+                sumWon = (long) Double.parseDouble(won);
+            }
 
             if (thisMonth == MM) {
-                String str = c.getString(c.getColumnIndex("body"));
-                if (strAdd.equals("15776200")) { // Çö´ë
-                    String[] spl = str.split("\\n");
-                    //Log.e("CardManagerClient", spl[0]+"-"+spl[1]+"-"+spl[2]+"-"+spl[3]);
-                    //String won = spl[3].substring(0, spl[3].indexOf("¿ø")).replace(",", "");
-                    String won = getNum(spl[3]);
-                    String cardName = spl[1].substring(0, spl[1].indexOf(" "));
-                    long sumWon = (long) Double.parseDouble(won);
-                    if (map.containsKey(cardName)) {
-                        Cards cds = map.get(cardName);
-                        cds.setThis_Month_Cost(cds.getThis_Month_Cost() + sumWon);
-                    } else {
-                        Cards nCds = new Cards(cardName);
-                        nCds.setThis_Month_Cost(nCds.getThis_Month_Cost() + sumWon);
-                        map.put(cardName, nCds);
-                    }
+                if (map.containsKey(cardName)) {
+                    Cards cds = map.get(cardName);
+                    cds.setThis_Month_Cost(cds.getThis_Month_Cost() + sumWon);
+                } else {
+                    Cards nCds = new Cards(cardName);
+                    nCds.setThis_Month_Cost(nCds.getThis_Month_Cost() + sumWon);
+                    map.put(cardName, nCds);
                 }
-                if (strAdd.equals("15447200")) { // ½ÅÇÑ
-                    String[] spl2 = str.split(" ");
-                    //Log.e("CardManagerClient", spl2[0]+"-"+spl2[1]+"-"+spl2[2]+"-"+spl2[3]+"-"+spl2[4]);
-                    //String won = spl2[4].substring(spl2[4].indexOf(")") + 1, spl2[4].indexOf("¿ø")).replace(",", "");
-                    String won = getNum(spl2[4]);
-                    String cardName = "½ÅÇÑÄ«µå " + spl2[1];
-                    long sumWon = (long) Double.parseDouble(won);
-                    if (map.containsKey(cardName)) {
-                        Cards cds = map.get(cardName);
-                        cds.setThis_Month_Cost(cds.getThis_Month_Cost() + sumWon);
-                    } else {
-                        Cards nCds = new Cards(cardName);
-                        nCds.setThis_Month_Cost(nCds.getThis_Month_Cost() + sumWon);
-                        map.put(cardName, nCds);
-                    }
-
-                   // CustomerDatabase.getInstance(null).insertSMSData(cardName,c.getString(c.getColumnIndex("date")),won);
-                }
-
-                String date = yyyy + "/" + MM + "/" + dd + " " + HH + ":" + mm + ":" + ss + "";
-                Log.d("shue", "body:" + str);
-                Log.e("shue", "date(origin):" + c.getString(c.getColumnIndex("date")));
-                Log.d("shue", "date:" + date);
-                Log.d("shue", "type:" + c.getString(c.getColumnIndex("type")));
-                Log.d("shue", "address:" + c.getString(c.getColumnIndex("address")));
             }
+
+            String dateConvert = yyyy + "/" + MM + "/" + dd + " " + HH + ":" + mm + ":" + ss + "";
+            Log.d("shue", "body:" + str);
+            Log.e("shue", "date(origin):" + date);
+            Log.d("shue", "date:" + dateConvert);
+            Log.d("shue", "type:" + c.getString(c.getColumnIndex("type")));
+            Log.d("shue", "address:" + c.getString(c.getColumnIndex("address")));
+            CustomerDatabase.getInstance(null).insertSMSData(cardName,date,won,str,dateConvert,strAdd);
+
+
         } catch (Exception ex) {
             Log.e("CardManagerClient", "Exception in getCardCostData()", ex);
         }
@@ -143,140 +135,141 @@ public class CardInfo {
     }
 
     public static final String[][] cardInfo= {
-            {"Çö´ë","ZERO"},
-            {"Çö´ë","X"},
-            {"Çö´ë","X2"},
-            {"Çö´ë","X3"},
-            {"Çö´ë","M"},
-            {"Çö´ë","M2"},
-            {"Çö´ë","M3"},
-            {"Çö´ë","RED"},
-            {"Çö´ë","PURPLE"},
-            {"Çö´ë","BLACK"},
-            {"Çö´ë","T3"},
-            {"Çö´ë","ÀÌ¸¶Æ® eÄ«µå"},
-            {"Çö´ë","±âÅ¸Á¦ÈŞÄ«µå"},
-            {"½ÅÇÑ","Cube"},
-            {"½ÅÇÑ","Tasty"},
-            {"½ÅÇÑ","Mr.Life"},
-            {"½ÅÇÑ","ÁÖ°Å·¡½Å¿ë"},
-            {"½ÅÇÑ","¹Ì·¡¼³°è"},
-            {"½ÅÇÑ","Air Platinum"},
-            {"½ÅÇÑ","Shopping"},
-            {"½ÅÇÑ","B.Big"},
-            {"½ÅÇÑ","LOVE"},
-            {"½ÅÇÑ","The ACE"},
-            {"½ÅÇÑ","BEST-F"},
-            {"½ÅÇÑ","CLASSIC+"},
-            {"½ÅÇÑ","LADY CLASSIC"},
-            {"½ÅÇÑ","CLASSIC-Y"},
-            {"½ÅÇÑ","RPM+ Platinum"},
-            {"½ÅÇÑ","Cube Platinum"},
-            {"½ÅÇÑ","Love Platinum"},
-            {"½ÅÇÑ","Simple"},
-            {"½ÅÇÑ","Simple Platinum"},
-            {"½ÅÇÑ","Lesson Platinum"},
-            {"½ÅÇÑ","23.5"},
-            {"½ÅÇÑ","Hi-Point Nano F"},
-            {"½ÅÇÑ","¾ÆÀÌÇàº¹(º¸À°·á)"},
-            {"»ï¼º","±¹¹ÎÇàº¹(ÀÓ½Å,Ãâ»ê)"},
-            {"»ï¼º","2v2"},
-            {"»ï¼º","3v2 / 3+v2"},
-            {"»ï¼º","4v2 / 4+v2 / BIZ"},
-            {"»ï¼º","5v2"},
-            {"»ï¼º","6v2 / BIZ"},
-            {"»ï¼º","7v2 / 7+v2"},
-            {"»ï¼º","THE 1 / ½ºÄ«ÀÌÆĞ½º / BIZ"},
-            {"»ï¼º","¾Æ½Ã¾Æ³ª ¾Ö´ÏÆĞ½º"},
-            {"»ï¼º","¾Æ¸Å¸®Ä­ ÀÍ½ºÇÁ·¹½º Platinum"},
-            {"»ï¼º","THE O"},
-            {"»ï¼º","¾Æ½Ã¾Æ³ª Áö¿£¹Ì"},
-            {"»ï¼º","¾Æ¸ß½º °ñµå"},
-            {"»ï¼º","¾Æ¸ß½º ºí·ç"},
-            {"»ï¼º","½ºÄ«ÀÌÆĞ½º"},
-            {"»ï¼º","½ºÆä¼È¸¶ÀÏ¸®Áö(½ºÄ«ÀÌÆĞ½º)"},
-            {"»ï¼º","taptap S"},
-            {"»ï¼º","taptap O"},
-            {"KB±¹¹Î","±Âµ¥ÀÌ"},
-            {"KB±¹¹Î","ÆÄÀÎÅ×Å©"},
-            {"KB±¹¹Î","´Ù´ã"},
-            {"KB±¹¹Î","°¡¿Â"},
-            {"KB±¹¹Î","Ã»Ãá´ë·Î"},
-            {"KB±¹¹Î","±Âµ¥ÀÌ¿Ã¸²"},
-            {"KB±¹¹Î","´©¸®"},
-            {"KB±¹¹Î","¿ÍÀÌÁî¿Ã¸²"},
-            {"KB±¹¹Î","ÈÆ"},
-            {"KB±¹¹Î","¹Î"},
-            {"KB±¹¹Î","Á¤"},
-            {"KB±¹¹Î","À½"},
-            {"KB±¹¹Î","Çı´ã"},
-            {"KB±¹¹Î","Çı´ã2"},
-            {"KB±¹¹Î","¿ÍÀÌÁî"},
-            {"KB±¹¹Î","±Â¼îÇÎ"},
-            {"KB±¹¹Î","½ºÅ¸¸Æ½º"},
-            {"KB±¹¹Î","¹Ì¸£"},
-            {"KB±¹¹Î","¾ÆÀÌÇàº¹"},
-            {"·Ôµ¥","µå¶óÀÌºùÆĞ½º"},
-            {"·Ôµ¥","DCÆĞ½º"},
-            {"·Ôµ¥","VEEX"},
-            {"·Ôµ¥","¾ÆÀÌÇàº¹"},
-            {"·Ôµ¥","¿Ã¸¶ÀÌ¼îÇÎ ±³Åë/Åë½Å/ÇØ¿Ü/Á¡½É"},
-            {"·Ôµ¥","Æ÷ÀÎÆ®ÇÃ·¯½º"},
-            {"·Ôµ¥","ÇÃ·¯½ºÆ÷ÅÙ"},
-            {"·Ôµ¥","DC½´ÇÁ¸²"},
-            {"·Ôµ¥","DC½º¸¶Æ®"},
-            {"·Ôµ¥","ÅõÀÎ¿ø"},
-            {"·Ôµ¥","½ºÄ«ÀÌÆĞ½º ·Ôµ¥°ñµå¾Æ¸ß½º"},
-            {"·Ôµ¥","·Ôµ¥ µ¥ÀÏ¸®"},
-            {"·Ôµ¥","º¤½º ÇÃ·¡Æ¼³Ñ"},
-            {"·Ôµ¥","DCÅ¬¸¯"},
-            {"·Ôµ¥","DCÇÃ·¯½º"},
-            {"·Ôµ¥","DC½ºÀ§Æ®"},
-            {"·Ôµ¥","¿ÉÆ¾ ÇÃ·¡Æ¼³Ñ"},
-            {"·Ôµ¥","±¹¹ÎÇàº¹(ÀÓ½Å,Ãâ»ê)"},
-            {"¾¾Æ¼","Å¬¸®¾î"},
-            {"¾¾Æ¼","¸®¿öµå"},
-            {"¾¾Æ¼","ÇÁ¸®¹Ì¾î¸¶ÀÏ"},
-            {"¾¾Æ¼","ÇÁ¸®½ºÆ¼Áö"},
-            {"¾¾Æ¼","¸ÖÆ¼ÇÃ·¯½º"},
-            {"³óÇù","½º¸¶Æ¼"},
-            {"³óÇù","º£ÀÌÁ÷"},
-            {"³óÇù","¼¥ÇÎ / ¼¥ÇÎ+"},
-            {"³óÇù","¿Ã¿ø"},
-            {"³óÇù","½Ã·´"},
-            {"³óÇù","Á¡Á¡"},
-            {"³óÇù","Å×ÀÌÅ©5"},
-            {"³óÇù","¾ÆÀÌÇàº¹(º¸À°·á)"},
-            {"³óÇù","¼îÇÎ¼¼ÀÌºê"},
-            {"³óÇù","ÇÏ³ª·Î"},
-            {"³óÇù","·¹ÀÌµğ ´Ù¼Ø"},
-            {"³óÇù","ME / ME+"},
-            {"³óÇù","±¹¹ÎÇàº¹(ÀÓ½Å,Ãâ»ê)"},
-            {"³óÇù","À§"},
-            {"ÇÏ³ª","Å¬·´ SK"},
-            {"ÇÏ³ª","2X ¾ËÆÄ/°¨¸¶/½Ã±×¸¶"},
-            {"ÇÏ³ª","ÅÍÄ¡¿ø"},
-            {"ÇÏ³ª","ºñ¹ÙG"},
-            {"ÇÏ³ª","Å©·Î½º¸¶ÀÏ"},
-            {"ÇÏ³ª","½Ã±×´ÏÃ³"},
-            {"ÇÏ³ª","POP"},
-            {"ÇÏ³ª","¾ÆÀÌÇàº¹(º¸À°·á)"},
-            {"ÇÏ³ª","½º¸¶Æ® DC"},
-            {"ÇÏ³ª","¹Ì»ı"},
-            {"ÇÏ³ª","»ıÈ°ÀÇ ´ŞÀÎ"},
-            {"ÇÏ³ª","Sync"},
-            {"ÇÏ³ª","ÇÏ³ª¸É¹ö½º 1Q"},
-            {"ÇÏ³ª","ºòÆÌ"},
-            {"ÇÏ³ª","½Ä»ş"},
-            {"¿ì¸®","°¡"},
-            {"¿ì¸®","³ª"},
-            {"¿ì¸®","´Ù"},
-            {"¿ì¸®","¶ó"},
-            {"¿ì¸®","NEW ¿ì¸®V"},
-            {"¿ì¸®","ºí·ç´ÙÀÌ¾Æ¸óµå"},
-            {"¿ì¸®","·Î¾âºí·ç"},
-            {"¿ì¸®","¾ÆÀÌÇàº¹(º¸À°·á)"}
+            {"í˜„ëŒ€","ZERO"},
+            {"í˜„ëŒ€","X"},
+            {"í˜„ëŒ€","X2"},
+            {"í˜„ëŒ€","X3"},
+            {"í˜„ëŒ€","M"},
+            {"í˜„ëŒ€","M2"},
+            {"í˜„ëŒ€","M3"},
+            {"í˜„ëŒ€","RED"},
+            {"í˜„ëŒ€","PURPLE"},
+            {"í˜„ëŒ€","BLACK"},
+            {"í˜„ëŒ€","T3"},
+            {"í˜„ëŒ€","ì´ë§ˆíŠ¸ eì¹´ë“œ"},
+            {"í˜„ëŒ€","ê¸°íƒ€ì œíœ´ì¹´ë“œ"},
+            {"ì‹ í•œ","Cube"},
+            {"ì‹ í•œ","Tasty"},
+            {"ì‹ í•œ","Mr.Life"},
+            {"ì‹ í•œ","ì£¼ê±°ë˜ì‹ ìš©"},
+            {"ì‹ í•œ","ë¯¸ë˜ì„¤ê³„"},
+            {"ì‹ í•œ","Air Platinum"},
+            {"ì‹ í•œ","Shopping"},
+            {"ì‹ í•œ","B.Big"},
+            {"ì‹ í•œ","LOVE"},
+            {"ì‹ í•œ","The ACE"},
+            {"ì‹ í•œ","BEST-F"},
+            {"ì‹ í•œ","CLASSIC+"},
+            {"ì‹ í•œ","LADY CLASSIC"},
+            {"ì‹ í•œ","CLASSIC-Y"},
+            {"ì‹ í•œ","RPM+ Platinum"},
+            {"ì‹ í•œ","Cube Platinum"},
+            {"ì‹ í•œ","Love Platinum"},
+            {"ì‹ í•œ","Simple"},
+            {"ì‹ í•œ","Simple Platinum"},
+            {"ì‹ í•œ","Lesson Platinum"},
+            {"ì‹ í•œ","23.5"},
+            {"ì‹ í•œ","Hi-Point Nano F"},
+            {"ì‹ í•œ","ì•„ì´í–‰ë³µ(ë³´ìœ¡ë£Œ)"},
+            {"ì‚¼ì„±","êµ­ë¯¼í–‰ë³µ(ì„ì‹ ,ì¶œì‚°)"},
+            {"ì‚¼ì„±","2v2"},
+            {"ì‚¼ì„±","3v2 / 3+v2"},
+            {"ì‚¼ì„±","4v2 / 4+v2 / BIZ"},
+            {"ì‚¼ì„±","5v2"},
+            {"ì‚¼ì„±","6v2 / BIZ"},
+            {"ì‚¼ì„±","7v2 / 7+v2"},
+            {"ì‚¼ì„±","THE 1 / ìŠ¤ì¹´ì´íŒ¨ìŠ¤ / BIZ"},
+            {"ì‚¼ì„±","ì•„ì‹œì•„ë‚˜ ì• ë‹ˆíŒ¨ìŠ¤"},
+            {"ì‚¼ì„±","ì•„ë§¤ë¦¬ì¹¸ ìµìŠ¤í”„ë ˆìŠ¤ Platinum"},
+            {"ì‚¼ì„±","THE O"},
+            {"ì‚¼ì„±","ì•„ì‹œì•„ë‚˜ ì§€ì—”ë¯¸"},
+            {"ì‚¼ì„±","ì•„ë©•ìŠ¤ ê³¨ë“œ"},
+            {"ì‚¼ì„±","ì•„ë©•ìŠ¤ ë¸”ë£¨"},
+            {"ì‚¼ì„±","ìŠ¤ì¹´ì´íŒ¨ìŠ¤"},
+            {"ì‚¼ì„±","ìŠ¤í˜ì…œë§ˆì¼ë¦¬ì§€(ìŠ¤ì¹´ì´íŒ¨ìŠ¤)"},
+            {"ì‚¼ì„±","taptap S"},
+            {"ì‚¼ì„±","taptap O"},
+            {"KBêµ­ë¯¼","êµ¿ë°ì´"},
+            {"KBêµ­ë¯¼","íŒŒì¸í…Œí¬"},
+            {"KBêµ­ë¯¼","ë‹¤ë‹´"},
+            {"KBêµ­ë¯¼","ê°€ì˜¨"},
+            {"KBêµ­ë¯¼","ì²­ì¶˜ëŒ€ë¡œ"},
+            {"KBêµ­ë¯¼","êµ¿ë°ì´ì˜¬ë¦¼"},
+            {"KBêµ­ë¯¼","ëˆ„ë¦¬"},
+            {"KBêµ­ë¯¼","ì™€ì´ì¦ˆì˜¬ë¦¼"},
+            {"KBêµ­ë¯¼","í›ˆ"},
+            {"KBêµ­ë¯¼","ë¯¼"},
+            {"KBêµ­ë¯¼","ì •"},
+            {"KBêµ­ë¯¼","ìŒ"},
+            {"KBêµ­ë¯¼","í˜œë‹´"},
+            {"KBêµ­ë¯¼","í˜œë‹´2"},
+            {"KBêµ­ë¯¼","ì™€ì´ì¦ˆ"},
+            {"KBêµ­ë¯¼","êµ¿ì‡¼í•‘"},
+            {"KBêµ­ë¯¼","ìŠ¤íƒ€ë§¥ìŠ¤"},
+            {"KBêµ­ë¯¼","ë¯¸ë¥´"},
+            {"KBêµ­ë¯¼","ì•„ì´í–‰ë³µ"},
+            {"ë¡¯ë°","ë“œë¼ì´ë¹™íŒ¨ìŠ¤"},
+            {"ë¡¯ë°","DCíŒ¨ìŠ¤"},
+            {"ë¡¯ë°","VEEX"},
+            {"ë¡¯ë°","ì•„ì´í–‰ë³µ"},
+            {"ë¡¯ë°","ì˜¬ë§ˆì´ì‡¼í•‘ êµí†µ/í†µì‹ /í•´ì™¸/ì ì‹¬"},
+            {"ë¡¯ë°","í¬ì¸íŠ¸í”ŒëŸ¬ìŠ¤"},
+            {"ë¡¯ë°","í”ŒëŸ¬ìŠ¤í¬í…"},
+            {"ë¡¯ë°","DCìŠˆí”„ë¦¼"},
+            {"ë¡¯ë°","DCìŠ¤ë§ˆíŠ¸"},
+            {"ë¡¯ë°","íˆ¬ì¸ì›"},
+            {"ë¡¯ë°","ìŠ¤ì¹´ì´íŒ¨ìŠ¤ ë¡¯ë°ê³¨ë“œì•„ë©•ìŠ¤"},
+            {"ë¡¯ë°","ë¡¯ë° ë°ì¼ë¦¬"},
+            {"ë¡¯ë°","ë²¡ìŠ¤ í”Œë˜í‹°ë„˜"},
+            {"ë¡¯ë°","DCí´ë¦­"},
+            {"ë¡¯ë°","DCí”ŒëŸ¬ìŠ¤"},
+            {"ë¡¯ë°","DCìŠ¤ìœ„íŠ¸"},
+            {"ë¡¯ë°","ì˜µí‹´ í”Œë˜í‹°ë„˜"},
+            {"ë¡¯ë°","êµ­ë¯¼í–‰ë³µ(ì„ì‹ ,ì¶œì‚°)"},
+            {"ì”¨í‹°","í´ë¦¬ì–´"},
+            {"ì”¨í‹°","ë¦¬ì›Œë“œ"},
+            {"ì”¨í‹°","í”„ë¦¬ë¯¸ì–´ë§ˆì¼"},
+            {"ì”¨í‹°","í”„ë¦¬ìŠ¤í‹°ì§€"},
+            {"ì”¨í‹°","ë©€í‹°í”ŒëŸ¬ìŠ¤"},
+            {"ë†í˜‘","ìŠ¤ë§ˆí‹°"},
+            {"ë†í˜‘","ë² ì´ì§"},
+            {"ë†í˜‘","ìƒµí•‘ / ìƒµí•‘+"},
+            {"ë†í˜‘","ì˜¬ì›"},
+            {"ë†í˜‘","ì‹œëŸ½"},
+            {"ë†í˜‘","ì ì "},
+            {"ë†í˜‘","í…Œì´í¬5"},
+            {"ë†í˜‘","ì•„ì´í–‰ë³µ(ë³´ìœ¡ë£Œ)"},
+            {"ë†í˜‘","ì‡¼í•‘ì„¸ì´ë¸Œ"},
+            {"ë†í˜‘","í•˜ë‚˜ë¡œ"},
+            {"ë†í˜‘","ë ˆì´ë”” ë‹¤ì†œ"},
+            {"ë†í˜‘","ME / ME+"},
+            {"ë†í˜‘","êµ­ë¯¼í–‰ë³µ(ì„ì‹ ,ì¶œì‚°)"},
+            {"ë†í˜‘","ìœ„"},
+            {"í•˜ë‚˜","í´ëŸ½ SK"},
+            {"í•˜ë‚˜","2X ì•ŒíŒŒ/ê°ë§ˆ/ì‹œê·¸ë§ˆ"},
+            {"í•˜ë‚˜","í„°ì¹˜ì›"},
+            {"í•˜ë‚˜","ë¹„ë°”G"},
+            {"í•˜ë‚˜","í¬ë¡œìŠ¤ë§ˆì¼"},
+            {"í•˜ë‚˜","ì‹œê·¸ë‹ˆì²˜"},
+            {"í•˜ë‚˜","POP"},
+            {"í•˜ë‚˜","ì•„ì´í–‰ë³µ(ë³´ìœ¡ë£Œ)"},
+            {"í•˜ë‚˜","ìŠ¤ë§ˆíŠ¸ DC"},
+            {"í•˜ë‚˜","ë¯¸ìƒ"},
+            {"í•˜ë‚˜","ìƒí™œì˜ ë‹¬ì¸"},
+            {"í•˜ë‚˜","Sync"},
+            {"í•˜ë‚˜","í•˜ë‚˜ë§´ë²„ìŠ¤ 1Q"},
+            {"í•˜ë‚˜","ë¹…íŒŸ"},
+            {"í•˜ë‚˜","ì‹ìƒ¤"},
+            {"ìš°ë¦¬","ê°€"},
+            {"ìš°ë¦¬","ë‚˜"},
+            {"ìš°ë¦¬","ë‹¤"},
+            {"ìš°ë¦¬","ë¼"},
+            {"ìš°ë¦¬","NEW ìš°ë¦¬V"},
+            {"ìš°ë¦¬","ë¸”ë£¨ë‹¤ì´ì•„ëª¬ë“œ"},
+            {"ìš°ë¦¬","ë¡œì–„ë¸”ë£¨"},
+            {"ìš°ë¦¬","ì•„ì´í–‰ë³µ(ë³´ìœ¡ë£Œ)"}
     };
+
 
 
 }

@@ -51,6 +51,7 @@ public class CustomerDatabase {
     public static String TABLE_CUSTOMER_INFO = "CUSTOMER_INFO";
     public static String TABLE_CARD_INFO = "CARD_INFO";
     public static String TABLE_CARDS = "CARDS";
+    public static String TABLE_SMS_DATA = "sms_data";
     /**
      * version
      */
@@ -200,14 +201,17 @@ public class CustomerDatabase {
         setTableCustomerInfo();
     }
 
-    public boolean insertSMSData(String cardName, String date, String cost)
+    public boolean insertSMSData(String cardName, String date, String cost,String text,String dateConvert,String company)
     {
         try {
             ContentValues values = new ContentValues();
-            values.put("CARD_NAME",cardName);
-            values.put("SMS_RECEIVE_DATE",date);
-            values.put("COST",cost);
-            db.insert(TABLE_CARDS,null,values);
+            values.put("cardName",cardName);
+            values.put("dataTime",date);
+            values.put("cost",cost);
+            values.put("text",text);
+            values.put("dateTimeConvert",dateConvert);
+            values.put("company",company);
+            db.insert(TABLE_SMS_DATA,null,values);
         } catch(Exception ex) {
             Log.e(TAG, "Exception in insertSMSData()", ex);
             return false;
@@ -327,6 +331,32 @@ public class CustomerDatabase {
                 db.execSQL(CREATE_SQL);
             } catch(Exception ex) {
                 Log.e(TAG, "Exception in CREATE_SQL TABLE_CARDS", ex);
+            }
+
+            // TABLE_SMS_DATA
+            println("creating table [" + TABLE_SMS_DATA + "].");
+
+            // drop existing table
+            DROP_SQL = "drop table if exists " + TABLE_SMS_DATA;
+            try {
+                db.execSQL(DROP_SQL);
+            } catch(Exception ex) {
+                Log.e(TAG, "Exception in DROP_SQL TABLE_SMS_DATA", ex);
+            }
+
+            // create table
+            CREATE_SQL = "create table " + TABLE_SMS_DATA +"(  " +
+                    "dataTime DOUBLE NOT NULL ON CONFLICT IGNORE UNIQUE, " +
+                    "dateTimeConvert DOUBLE, " +
+                    "text TEXT, " +
+                    "cost DOUBLE, " +
+                    "type NVARCHAR(10), " +
+                    "company NVARCHAR(10), " +
+                    "cardName VARCHAR(20));";
+            try {
+                db.execSQL(CREATE_SQL);
+            } catch(Exception ex) {
+                Log.e(TAG, "Exception in CREATE_SQL TABLE_SMS_DATA", ex);
             }
 
             // TABLE_CARD_INFO

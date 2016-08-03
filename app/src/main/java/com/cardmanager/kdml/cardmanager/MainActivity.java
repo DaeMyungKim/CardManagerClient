@@ -70,7 +70,8 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
 
                 Snackbar.make(view,getResources().getString(R.string.main_refresh), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                selectData();
+                if(cd.setTableCustomerInfo() && cd.setCardInfo())
+                    selectData();
             }
         });
 
