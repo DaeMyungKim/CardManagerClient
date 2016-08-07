@@ -8,6 +8,16 @@ import java.util.Random;
  * Created by kdml on 2016-06-16.
  */
 public class Cards {
+
+
+
+
+
+
+
+
+
+
     private String card_Name;
     private long this_Month_Cost;
     public static final String[] sCheeseStrings = {

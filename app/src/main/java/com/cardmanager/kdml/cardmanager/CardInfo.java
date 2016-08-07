@@ -1,16 +1,13 @@
 package com.cardmanager.kdml.cardmanager;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
-import android.widget.Toast;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
 
 /**
  * Created by kdml on 2016-06-20.
@@ -29,15 +26,35 @@ public class CardInfo {
     public void setCard_List(ArrayList<Cards> card_List) {
         this.card_List = card_List;
     }
-
+    public ArrayList<String> getAl() {return al;}
+    public void setAl(ArrayList<String> al) {this.al = al;}
+    public String getCardName() {return cardName;}
+    public void setCardName(String cardName) {this.cardName = cardName;}
+    public long getMonthlyCost() {return monthlyCost;}
+    public void setMonthlyCost(long monthlyCost) {this.monthlyCost = monthlyCost;}
+    public String getMonthlyCostStr() {return monthlyCostStr;}
+    public void setMonthlyCostStr(String monthlyCostStr) {this.monthlyCostStr = monthlyCostStr;}
+    public int getThisMonth() {
+        return thisMonth;
+    }
+    public void setThisMonth(int thisMonth) {
+        this.thisMonth = thisMonth;
+    }
+    public ArrayList<String> al;
     private String card_Company;
     private String card_Tell_Num;
+    private long monthlyCost;
+    private String cardName;
+    private String monthlyCostStr;
     private ArrayList<Cards> card_List;
+
+
+
     private int thisMonth;
-    HashMap<String,Cards> map;
+
     public CardInfo(Cursor cs)
     {
-        map = new HashMap<>(20, 0.8f);
+
         card_Company = cs.getString(cs.getColumnIndex("CARD_COMPANY"));
         card_Tell_Num = cs.getString(cs.getColumnIndex("CARD_TEL_NUM"));
         Calendar cal = Calendar.getInstance();
@@ -47,10 +64,10 @@ public class CardInfo {
 
     public void setSMSData(ContentResolver cr)
     {
-        map.clear();
         String selection = "address = ?";
         String[] selectionArgs = {card_Tell_Num};
         String sortOrder = "date ASC";
+        // SMS 문자 데이터를 전부 읽어옴
         Cursor c = cr.query(Uri.parse("content://sms/inbox"), null, selection, selectionArgs, sortOrder);
         if(c.moveToFirst()){
             while(c.moveToNext()){
@@ -58,23 +75,15 @@ public class CardInfo {
                 getCardCostData(c,thisMonth,strAdd);
             }
         }
-        DecimalFormat fmt=new DecimalFormat("##,###");
-        Iterator<Cards> it = map.values().iterator();
-        while(it.hasNext())
-        {
-            Cards cds = it.next();
-            String sss = cds.getCard_Name()+" "+thisMonth+"월 사용금액 : "+fmt.format(cds.getThis_Month_Cost())+"원";
-            Cards.idsArrList.add(sss);
-        }
-
         c.close();
     }
 
     public void getCardCostData(Cursor c,int thisMonth,String strAdd) {
         try {
-            Calendar cal = Calendar.getInstance();
+
             String date = c.getString(c.getColumnIndex("date"));
             long origin = (long) Double.parseDouble(date);
+            Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(origin);
             int yyyy = cal.get(Calendar.YEAR);
             int MM = (cal.get(Calendar.MONTH) + 1);
@@ -84,38 +93,34 @@ public class CardInfo {
             int ss = cal.get(Calendar.SECOND);
             String cardName = "",won = "";
             String str = c.getString(c.getColumnIndex("body"));
-            long sumWon=0;
             if (strAdd.equals("15776200")) { // 현대카드
                 String[] spl = str.split("\\n");
                 won = getNum(spl[3]);
-                cardName = spl[1].substring(0, spl[1].indexOf(" "));
-                sumWon = (long) Double.parseDouble(won);
+                cardName = al.get(2) + spl[1].substring(0, spl[1].indexOf(" "));
             }
             if (strAdd.equals("15447200")) { // 신한카드
                 String[] spl2 = str.split(" ");
                 won = getNum(spl2[4]);
-                cardName = "신한카드 " + spl2[1];
-                sumWon = (long) Double.parseDouble(won);
+                cardName = al.get(4) + spl2[1];
             }
 
-            if (thisMonth == MM) {
-                if (map.containsKey(cardName)) {
-                    Cards cds = map.get(cardName);
-                    cds.setThis_Month_Cost(cds.getThis_Month_Cost() + sumWon);
-                } else {
-                    Cards nCds = new Cards(cardName);
-                    nCds.setThis_Month_Cost(nCds.getThis_Month_Cost() + sumWon);
-                    map.put(cardName, nCds);
-                }
-            }
-
-            String dateConvert = yyyy + "/" + MM + "/" + dd + " " + HH + ":" + mm + ":" + ss + "";
+            String dateConvert = yyyy + "" + MM + "" + dd + " " + HH + ":" + mm + ":" + ss + "";
             Log.d("shue", "body:" + str);
-            Log.e("shue", "date(origin):" + date);
+            Log.d("shue", "date(origin):" + date);
             Log.d("shue", "date:" + dateConvert);
             Log.d("shue", "type:" + c.getString(c.getColumnIndex("type")));
             Log.d("shue", "address:" + c.getString(c.getColumnIndex("address")));
-            CustomerDatabase.getInstance(null).insertSMSData(cardName,date,won,str,dateConvert,strAdd);
+            ContentValues values = new ContentValues();
+            values.put("cardName",cardName);
+            values.put("dataTime",date);
+            values.put("cost",won);
+            values.put("text",str);
+            values.put("dateTimeConvert",dateConvert);
+            values.put("company",strAdd);
+            values.put("year",yyyy);
+            values.put("month",MM);
+            values.put("day",dd);
+            CustomerDatabase.getInstance(null).insertSMSData(values);
 
 
         } catch (Exception ex) {

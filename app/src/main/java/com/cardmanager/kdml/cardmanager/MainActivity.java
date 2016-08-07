@@ -31,6 +31,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements StatisticFragment.OnFragmentInteractionListener, TalkListFragment.OnFragmentInteractionListener
@@ -105,16 +106,32 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
 
         String sortOrder = People._COUNT + "ASC";
         * */
-        Cards.idsArrList.clear();
+
         ContentResolver cr = getContentResolver();
+        ArrayList<String> al = setTxt();
+        Calendar cal = Calendar.getInstance();
+        int thisMonth = cal.get(Calendar.MONTH)+1;
         for(int i = 0; i < cd.getCardInfoArrayList().size();i++)
         {
             CardInfo ci = cd.getCardInfoArrayList().get(i);
+            ci.setAl(setTxt());
             ci.setSMSData(cr);
-
         }
+        cd.setMonthlyCostData(thisMonth,al);
         setupViewPager(viewPager);
     }
+    public ArrayList<String> setTxt()
+    {
+        ArrayList<String> al = new ArrayList<String>();
+        al.add(getResources().getText(R.string.main_txt1).toString());
+        al.add(getResources().getText(R.string.main_txt2).toString());
+        al.add(getResources().getText(R.string.card_hyundae).toString());
+        al.add(getResources().getText(R.string.card_samsung).toString());
+        al.add(getResources().getText(R.string.card_shinhan).toString());
+        return al;
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -149,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
         TextView te = (TextView) findViewById(R.id.userName);
         cd = CustomerDatabase.getInstance(this);
 
-        te.setText(getResources().getString(R.string.user_name)+cd.getCustomerName());
+        te.setText(getResources().getString(R.string.user_name)+cd.getUser().getName());
         switch (item.getItemId()) {
             case android.R.id.home:
                 mDrawerLayout.openDrawer(GravityCompat.START);

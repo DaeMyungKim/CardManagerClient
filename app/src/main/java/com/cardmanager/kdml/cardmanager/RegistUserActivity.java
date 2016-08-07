@@ -71,8 +71,8 @@ public class RegistUserActivity extends AppCompatActivity {
                 User userModel = new User(user.getEmail());
                 databaseReference.child("users").child(user.getUid()).setValue(userModel);
                 CustomerDatabase cd = CustomerDatabase.getInstance(this);
-                cd.setCustomerEmain(email);
-                cd.setCustomerName(email);
+                cd.getUser().setEmail(email);
+                cd.getUser().setName(email);
                 cd.updateUserInfo(userModel);
                 extra.putInt("data",1);
                 intent.putExtras(extra);

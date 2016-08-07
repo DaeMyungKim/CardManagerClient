@@ -66,6 +66,8 @@ public class EmailPasswordActivity extends BaseActivity implements
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
+                CustomerDatabase cd = CustomerDatabase.getInstance(null);
+                User appUser = cd.getUser();
                 if (user != null) {
                     // User is signed in
                     //Toast.makeText(getBaseContext(),"Login success",Toast.LENGTH_LONG).show();
@@ -73,12 +75,20 @@ public class EmailPasswordActivity extends BaseActivity implements
                     extra.putInt("data",1);
                     intent.putExtras(extra);
                     setResult(RESULT_OK,intent);
+                    appUser.setName(user.getEmail());
+                    appUser.setKey( user.getUid());
+                    appUser.setEmail(user.getEmail());
+                    cd.updateUserInfo_Email_FireBaseID(appUser);
                     if(isLoginFlag)
                         finish();
                 } else {
                     // User is signed out
                     //Toast.makeText(getBaseContext(),"Logout",Toast.LENGTH_LONG).show();
                     Log.d(TAG, "onAuthStateChanged:signed_out");
+                    appUser.setName("Guest");
+                    appUser.setKey("");
+                    appUser.setEmail("Guest");
+                    cd.updateUserInfo_Email_FireBaseID(appUser);
                 }
                 // [START_EXCLUDE]
                 updateUI(user);

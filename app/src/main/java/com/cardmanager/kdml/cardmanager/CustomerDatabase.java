@@ -8,20 +8,25 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.util.Log;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 /**
  * Created by kdml on 2016-06-19.
  */
 public class CustomerDatabase {
-    String CustomerName;
-    String CustomerEmain;
+    //String CustomerName;
+    //String CustomerEmain;
+    User user;
+    public User getUser() {return user;}
+    public void setUser(User user) {this.user = user;}
+
     int lastSMSTime;
     private ArrayList<CardInfo> cardInfoArrayList;
 
     public int getLastSMSTime() {return lastSMSTime;}
     public void setLastSMSTime(int lastSMSTime) {this.lastSMSTime = lastSMSTime;}
-    public String getCustomerEmain() {
+    /*public String getCustomerEmain() {
         return CustomerEmain;
     }
     public void setCustomerEmain(String customerEmain) {
@@ -30,7 +35,7 @@ public class CustomerDatabase {
     public String getCustomerName() {
         return CustomerName;
     }
-    public void setCustomerName(String customerName) {CustomerName = customerName;}
+    public void setCustomerName(String customerName) {CustomerName = customerName;}*/
     public ArrayList<CardInfo> getCardInfoArrayList() {return cardInfoArrayList;}
     public void setCardInfoArrayList(ArrayList<CardInfo> cardInfoArrayList) {this.cardInfoArrayList = cardInfoArrayList;}
     /**
@@ -72,6 +77,7 @@ public class CustomerDatabase {
      */
     private CustomerDatabase(Context context) {
         this.context = context;
+        this.user = new User();
     }
     //클래스 전역변수
     private final String rootFolderName = "/cardManager";
@@ -152,11 +158,55 @@ public class CustomerDatabase {
 
         return true;
     }
+    public boolean setMonthlyCostData(int month,ArrayList<String> al)
+    {
+        boolean flg = false;
 
+        Cursor cs = null;
+        try{
+            String sql = "select cardName , sum(cost) from "+TABLE_SMS_DATA+" where month = '"+month+"' group by cardName ";
+            cs = rawQuery(sql);
+            Cards.idsArrList.clear();
+            if(cs.moveToFirst()){
+                while(cs.moveToNext()){
+                    //cardInfoArrayList.add(new CardInfo(cs));
+                    if(cs.getCount() > 0)
+                    {
+                        DecimalFormat fmt=new DecimalFormat("##,###");
+                        String cost = String.valueOf(cs.getLong(1));
+                        Log.d("shue", "body:" + cs.getString(0));
+                        Log.d("shue", "body:" + month);
+                        Log.d("shue", "body:" + al.get(0));
+                        Log.d("shue", "body:" + cs.getLong(1));
+                        Log.d("shue", "body:" + al.get(1));
+                        //Log.d("shue", "body:" + fmt.format(cost));
+
+                        //String str = cs.getString(0) + month+al.get(0)+fmt.format(cost)+al.get(1);
+                        String str = cs.getString(0) + month+al.get(0)+cost+al.get(1);
+                        Cards.idsArrList.add(str);
+                        flg = true;
+                    }
+                }
+            }
+
+        }
+        catch(Exception ex)
+        {
+            Log.e(TAG, "Exception in setTableCustomerInfo()", ex);
+            flg = false;
+        }
+        finally {
+            if(cs != null)
+                cs.close();
+        }
+
+
+        return flg;
+    }
     public boolean setTableCustomerInfo()
     {
         boolean flg = false;
-        if(CustomerName == null || CustomerName.length() == 0)
+        if(user.getName() == null || user.getName().length() == 0)
         {
             Cursor cs = null;
             try{
@@ -167,8 +217,8 @@ public class CustomerDatabase {
                 else
                 {
                     cs.moveToNext();
-                    setCustomerName(cs.getString(0));
-                    setCustomerEmain(cs.getString(1));
+                    user.setName(cs.getString(0));
+                    user.setEmail(cs.getString(1));
                     setLastSMSTime(cs.getInt(2));
                     flg = true;
                 }
@@ -183,7 +233,7 @@ public class CustomerDatabase {
                     cs.close();
             }
         }
-        else if(CustomerName != null && CustomerName.length() > 0)
+        else if(user.getName() != null && user.getName().length() > 0)
         {
             flg = true;
         }
@@ -201,16 +251,9 @@ public class CustomerDatabase {
         setTableCustomerInfo();
     }
 
-    public boolean insertSMSData(String cardName, String date, String cost,String text,String dateConvert,String company)
+    public boolean insertSMSData(ContentValues values)
     {
         try {
-            ContentValues values = new ContentValues();
-            values.put("cardName",cardName);
-            values.put("dataTime",date);
-            values.put("cost",cost);
-            values.put("text",text);
-            values.put("dateTimeConvert",dateConvert);
-            values.put("company",company);
             db.insert(TABLE_SMS_DATA,null,values);
         } catch(Exception ex) {
             Log.e(TAG, "Exception in insertSMSData()", ex);
@@ -219,9 +262,21 @@ public class CustomerDatabase {
         return true;
     }
 
+    public boolean updateUserInfo_Email_FireBaseID(User user)
+    {
+        String UPDATE_SQL = "update " + TABLE_CUSTOMER_INFO +" set CUSTOMER_EMAIL = '" + user.getEmail() +"', CUSTOMER_NAME = '"+user.getName()  +"', FireBase_ID = '" + user.getFireBase_ID()+"'";
+        try {
+            db.execSQL(UPDATE_SQL);
+        } catch(Exception ex) {
+            Log.e(TAG, "Exception in UPDATE_SQL TABLE_CUSTOMER_INFO", ex);
+            return false;
+        }
+        return true;
+    }
+
     public boolean updateUserInfo(User user)
     {
-        String UPDATE_SQL = "update " + TABLE_CUSTOMER_INFO +" set CUSTOMER_EMAIL = '" + user.getEmail() +"' CUSTOMER_NAME = '" + user.getName()+"'";
+        String UPDATE_SQL = "update " + TABLE_CUSTOMER_INFO +" set CUSTOMER_EMAIL = '" + user.getEmail() +"', CUSTOMER_NAME = '" + user.getName()+"'";
         try {
             db.execSQL(UPDATE_SQL);
         } catch(Exception ex) {
@@ -296,7 +351,9 @@ public class CustomerDatabase {
                     + "  CUSTOMER_EMAIL TEXT  NOT NULL, "
                     + "  CUSTOMER_NAME TEXT, "
                     + "  CREATE_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-                    + "  LAST_SMS_TIME INTEGER "
+                    + "  LAST_SMS_TIME INTEGER, "
+                    + "  SMS_Read_Date DOUBLE, "
+                    + "  FireBase_ID TEXT "
                     + ")";
             try {
                 db.execSQL(CREATE_SQL);
@@ -346,12 +403,15 @@ public class CustomerDatabase {
 
             // create table
             CREATE_SQL = "create table " + TABLE_SMS_DATA +"(  " +
-                    "dataTime DOUBLE NOT NULL ON CONFLICT IGNORE UNIQUE, " +
-                    "dateTimeConvert DOUBLE, " +
+                    "dataTime NUMBER NOT NULL ON CONFLICT IGNORE UNIQUE, " +
+                    "dateTimeConvert NVARCHAR(20), " +
                     "text TEXT, " +
-                    "cost DOUBLE, " +
+                    "cost NUMBER, " +
                     "type NVARCHAR(10), " +
                     "company NVARCHAR(10), " +
+                    "month INT, " +
+                    "year INT, " +
+                    "day INT, " +
                     "cardName VARCHAR(20));";
             try {
                 db.execSQL(CREATE_SQL);
