@@ -8,6 +8,13 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.util.Log;
 
+import com.cardmanager.kdml.cardmanager.DTO.CostData;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -161,12 +168,13 @@ public class CustomerDatabase {
     public boolean setMonthlyCostData(int month,ArrayList<String> al)
     {
         boolean flg = false;
-
+        mDatabase = FirebaseDatabase.getInstance().getReference();
         Cursor cs = null;
         try{
-            String sql = "select cardName , sum(cost) from "+TABLE_SMS_DATA+" where month = '"+month+"' group by cardName ";
+            String sql = "select cardName , sum(cost),month,year from "+TABLE_SMS_DATA+" where month = '"+month+"' group by cardName,year,month ";
             cs = rawQuery(sql);
             Cards.idsArrList.clear();
+            ArrayList<CostData> costdata = new ArrayList<>();
             if(cs.moveToFirst()){
                 while(cs.moveToNext()){
                     //cardInfoArrayList.add(new CardInfo(cs));
@@ -175,7 +183,7 @@ public class CustomerDatabase {
                         DecimalFormat fmt=new DecimalFormat("##,###");
                         String cost = String.valueOf(cs.getLong(1));
                         Log.d("shue", "body:" + cs.getString(0));
-                        Log.d("shue", "body:" + month);
+                        Log.d("shue", "body:" + cs.getString(3)+cs.getString(2));
                         Log.d("shue", "body:" + al.get(0));
                         Log.d("shue", "body:" + cs.getLong(1));
                         Log.d("shue", "body:" + al.get(1));
@@ -184,11 +192,12 @@ public class CustomerDatabase {
                         //String str = cs.getString(0) + month+al.get(0)+fmt.format(cost)+al.get(1);
                         String str = cs.getString(0) + month+al.get(0)+cost+al.get(1);
                         Cards.idsArrList.add(str);
+                        CostData cdata = new CostData(cs.getString(0),cs.getString(3)+cs.getString(2),cost);
+                        updateFBDB(cdata);
                         flg = true;
                     }
                 }
             }
-
         }
         catch(Exception ex)
         {
@@ -203,6 +212,12 @@ public class CustomerDatabase {
 
         return flg;
     }
+    private DatabaseReference mDatabase;
+    public void updateFBDB(CostData cd)
+    {
+        mDatabase.child("cost").child(this.getUser().getFireBase_ID()).push().child(cd.getYearMonth()).setValue(cd);
+    }
+
     public boolean setTableCustomerInfo()
     {
         boolean flg = false;
@@ -264,6 +279,7 @@ public class CustomerDatabase {
 
     public boolean updateUserInfo_Email_FireBaseID(User user)
     {
+        this.setUser(user);
         String UPDATE_SQL = "update " + TABLE_CUSTOMER_INFO +" set CUSTOMER_EMAIL = '" + user.getEmail() +"', CUSTOMER_NAME = '"+user.getName()  +"', FireBase_ID = '" + user.getFireBase_ID()+"'";
         try {
             db.execSQL(UPDATE_SQL);
