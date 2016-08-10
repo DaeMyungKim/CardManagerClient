@@ -95,7 +95,7 @@ public class CardInfo {
             String str = c.getString(c.getColumnIndex("body"));
             if (strAdd.equals("15776200")) { // 현대카드
                 String[] spl = str.split("\\n");
-                won = getNum(spl[3]);
+                won = getNum(spl[3].split(" ")[0]);
                 cardName = al.get(2) + spl[1].substring(0, spl[1].indexOf(" "));
             }
             if (strAdd.equals("15447200")) { // 신한카드

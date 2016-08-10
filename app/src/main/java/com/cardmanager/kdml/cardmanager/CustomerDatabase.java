@@ -215,7 +215,7 @@ public class CustomerDatabase {
     private DatabaseReference mDatabase;
     public void updateFBDB(CostData cd)
     {
-        mDatabase.child("cost").child(this.getUser().getFireBase_ID()).push().child(cd.getYearMonth()).setValue(cd);
+        mDatabase.child("users").child(this.getUser().getFireBase_ID()).child(cd.getYearMonth()).push().setValue(cd);
     }
 
     public boolean setTableCustomerInfo()
