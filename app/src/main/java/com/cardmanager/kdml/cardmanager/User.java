@@ -1,9 +1,41 @@
 package com.cardmanager.kdml.cardmanager;
 
+import com.cardmanager.kdml.cardmanager.DTO.CostData;
+
+import java.util.ArrayList;
+
 /**
  * Created by 김대명사무실 on 2016-07-29.
  */
 public class User {
+    public User(){}
+    public User(String _email)
+    {
+        email = _email;
+    }
+
+
+    public String name;
+    public String email;
+    public String phone;
+    public ArrayList<CostData> usingHistory;
+    public String fireBase_ID;
+
+
+    public User(String name, String email, String phone) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getEmail() {
         return email;
@@ -13,38 +45,19 @@ public class User {
         this.email = email;
     }
 
-    public String email;
-    public String name;
-    public String FireBase_ID;
-
-    public String getLastSMSReadDate() {
-        return lastSMSReadDate;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setLastSMSReadDate(String lastSMSReadDate) {
-        this.lastSMSReadDate = lastSMSReadDate;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getFireBase_ID() {
-        return FireBase_ID;
+        return fireBase_ID;
     }
 
-    public void setKey(String FireBase_ID) {
-        this.FireBase_ID = FireBase_ID;
-    }
-
-    public String lastSMSReadDate;
-    public User(){}
-    public User(String _email)
-    {
-        email = _email;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setFireBase_ID(String fireBase_ID) {
+        this.fireBase_ID = fireBase_ID;
     }
 }

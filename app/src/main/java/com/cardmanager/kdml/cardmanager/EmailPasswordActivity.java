@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
 
 public class EmailPasswordActivity extends BaseActivity implements
         View.OnClickListener {
@@ -27,7 +28,7 @@ public class EmailPasswordActivity extends BaseActivity implements
     private EditText mEmailField;
     private EditText mPasswordField;
     private boolean isLoginFlag = false;
-
+    private DatabaseReference mDatabase;
     // [START declare_auth]
     private FirebaseAuth mAuth;
     // [END declare_auth]
@@ -76,7 +77,7 @@ public class EmailPasswordActivity extends BaseActivity implements
                     intent.putExtras(extra);
                     setResult(RESULT_OK,intent);
                     appUser.setName(user.getEmail());
-                    appUser.setKey( user.getUid());
+                    appUser.setFireBase_ID( user.getUid());
                     appUser.setEmail(user.getEmail());
                     cd.updateUserInfo_Email_FireBaseID(appUser);
                     if(isLoginFlag)
@@ -86,7 +87,7 @@ public class EmailPasswordActivity extends BaseActivity implements
                     //Toast.makeText(getBaseContext(),"Logout",Toast.LENGTH_LONG).show();
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                     appUser.setName("Guest");
-                    appUser.setKey("");
+                    appUser.setFireBase_ID("");
                     appUser.setEmail("Guest");
                     cd.updateUserInfo_Email_FireBaseID(appUser);
                 }

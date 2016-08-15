@@ -9,14 +9,12 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.cardmanager.kdml.cardmanager.DTO.CostData;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  * Created by kdml on 2016-06-19.
@@ -190,9 +188,20 @@ public class CustomerDatabase {
                         //Log.d("shue", "body:" + fmt.format(cost));
 
                         //String str = cs.getString(0) + month+al.get(0)+fmt.format(cost)+al.get(1);
+
+
+                        Calendar cal = Calendar.getInstance();
+                        String yyyy = String.valueOf(cal.get(Calendar.YEAR));
+                        String MM = String.valueOf((cal.get(Calendar.MONTH) + 1));
+                        String dd = String.valueOf(cal.get(Calendar.DATE));
+                        String HH = String.valueOf(cal.get(Calendar.HOUR));
+                        String mm = String.valueOf(cal.get(Calendar.MINUTE));
+                        String ss = String.valueOf(cal.get(Calendar.SECOND));
+
                         String str = cs.getString(0) + month+al.get(0)+cost+al.get(1);
                         Cards.idsArrList.add(str);
-                        CostData cdata = new CostData(cs.getString(0),cs.getString(3)+cs.getString(2),cost);
+                        CostData cdata = new CostData(yyyy+MM+dd+HH+mm+ss,cs.getString(0),cs.getString(3)+cs.getString(2),cost,cal.getTime().toString(),this.getUser().getEmail());
+                        //CostData cdata = new CostData(cs.getString(0),cs.getString(3)+cs.getString(2),cost);
                         updateFBDB(cdata);
                         flg = true;
                     }
@@ -215,7 +224,10 @@ public class CustomerDatabase {
     private DatabaseReference mDatabase;
     public void updateFBDB(CostData cd)
     {
-        mDatabase.child("users").child(this.getUser().getFireBase_ID()).child(cd.getYearMonth()).push().setValue(cd);
+        Log.d("kdml",this.getUser().getFireBase_ID());
+        mDatabase.child("cost").push().setValue(cd);
+
+
     }
 
     public boolean setTableCustomerInfo()
