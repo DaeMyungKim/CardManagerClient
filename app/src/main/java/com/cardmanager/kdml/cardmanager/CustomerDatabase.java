@@ -226,8 +226,8 @@ public class CustomerDatabase {
     {
         Log.d("kdml",this.getUser().getFireBase_ID());
         mDatabase.child("cost").push().setValue(cd);
-
-
+        String cardNameconvert = cd.getCardName().replace("[","(").replace("]",")");
+        FirebaseDatabase.getInstance().getReference().child("costs").child(getUser().getFireBase_ID()).child(cd.getYearMonth()).child(cardNameconvert).setValue(cd);
     }
 
     public boolean setTableCustomerInfo()
