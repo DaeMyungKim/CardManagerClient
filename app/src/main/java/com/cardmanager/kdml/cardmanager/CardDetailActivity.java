@@ -8,6 +8,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.widget.ImageView;
 import com.bumptech.glide.Glide;
+import com.cardmanager.kdml.cardmanager.DTO.Cards;
+
 /**
  * Created by kdml on 2016-06-16.
  */

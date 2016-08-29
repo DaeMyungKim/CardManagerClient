@@ -91,6 +91,8 @@
   <string name="token_null">Token: null</string>
   <string name="hint_email">Email</string>
   <string name="hint_password">Password</string>
+  <string name="hint_name">Name</string>
+  <string name="hint_phone">Phone Number</string>
   <string name="desc_firebase_lockup">Firebase logo and name</string>
   <string name="auth_failed">Authentication failed</string>
 

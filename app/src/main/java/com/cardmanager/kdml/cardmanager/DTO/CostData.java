@@ -13,24 +13,30 @@ public class CostData {
     private String dateTimeOrigin;
     private String dateTime;
     private String email;
+    private String name;
+    private String phone;
 
-    private Map<String,HashMap> maptest;
     public CostData(){}
 
-    public CostData(String dateTime, String cardName, String yearMonth, String cost, String dateTimeOrigin,String email) {
+    public CostData(String dateTime, String cardName, String yearMonth, String cost, String dateTimeOrigin, String email, String name, String phone) {
+        this.cardName = cardName;
+        this.cost = cost;
+        this.dateTime = dateTime;
+        this.dateTimeOrigin = dateTimeOrigin;
+        this.email = email;
+        this.name = name;
+        this.phone = phone;
+        this.yearMonth = yearMonth;
+    }
+
+    public CostData(String dateTime, String cardName, String yearMonth, String cost, String dateTimeOrigin, String email) {
         this.dateTime = dateTime;
         this.cardName = cardName;
         this.yearMonth = yearMonth;
         this.cost = cost;
         this.dateTimeOrigin = dateTimeOrigin;
         this.email = email;
-        HashMap<String,CostData> submap = new HashMap<>();
-        maptest = new HashMap<>();
 
-        submap.put("test1",new CostData("test1","test1","test1"));
-        submap.put("test2",new CostData("test2","test2","test2"));
-        maptest.put("201607",submap);
-        maptest.put("201608",submap);
 
     }
 
@@ -88,11 +94,19 @@ public class CostData {
         this.dateTime = dateTime;
     }
 
-    public Map<String, HashMap> getMaptest() {
-        return maptest;
+    public String getName() {
+        return name;
     }
 
-    public void setMaptest(Map<String, HashMap> maptest) {
-        this.maptest = maptest;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }

@@ -1,4 +1,4 @@
-package com.cardmanager.kdml.cardmanager;
+package com.cardmanager.kdml.cardmanager.DTO;
 
 import com.cardmanager.kdml.cardmanager.DTO.CostData;
 
@@ -18,9 +18,14 @@ public class User {
     public String name;
     public String email;
     public String phone;
-    public ArrayList<CostData> usingHistory;
     public String fireBase_ID;
 
+    public User(String email, String fireBase_ID, String name, String phone) {
+        this.email = email;
+        this.fireBase_ID = fireBase_ID;
+        this.name = name;
+        this.phone = phone;
+    }
 
     public User(String name, String email, String phone) {
         this.name = name;

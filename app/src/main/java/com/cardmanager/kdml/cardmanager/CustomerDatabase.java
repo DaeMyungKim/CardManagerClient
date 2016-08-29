@@ -8,13 +8,18 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.util.Log;
 
+import com.cardmanager.kdml.cardmanager.DTO.Cards;
+import com.cardmanager.kdml.cardmanager.DTO.Cost;
 import com.cardmanager.kdml.cardmanager.DTO.CostData;
+import com.cardmanager.kdml.cardmanager.DTO.User;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by kdml on 2016-06-19.
@@ -172,7 +177,8 @@ public class CustomerDatabase {
             String sql = "select cardName , sum(cost),month,year from "+TABLE_SMS_DATA+" where month = '"+month+"' group by cardName,year,month ";
             cs = rawQuery(sql);
             Cards.idsArrList.clear();
-            ArrayList<CostData> costdata = new ArrayList<>();
+            Map<String,HashMap> maptest = new HashMap<>();
+
             if(cs.moveToFirst()){
                 while(cs.moveToNext()){
                     //cardInfoArrayList.add(new CardInfo(cs));
@@ -200,13 +206,28 @@ public class CustomerDatabase {
 
                         String str = cs.getString(0) + month+al.get(0)+cost+al.get(1);
                         Cards.idsArrList.add(str);
-                        CostData cdata = new CostData(yyyy+MM+dd+HH+mm+ss,cs.getString(0),cs.getString(3)+cs.getString(2),cost,cal.getTime().toString(),this.getUser().getEmail());
+                        String cardNameconvert = cs.getString(0).replace("[","(").replace("]",")");
+                        CostData cdata = new CostData(yyyy+MM+dd+HH+mm+ss,cardNameconvert,cs.getString(3)+cs.getString(2),cost,cal.getTime().toString(),this.getUser().getEmail(),getUser().getName(),getUser().getPhone());
+                        if(maptest.containsKey(cdata.getYearMonth()))
+                        {
+                            HashMap<String,CostData> submap = maptest.get(cdata.getYearMonth());
+                            submap.put(cdata.getCardName(),cdata);
+                        }
+                        else
+                        {
+                            HashMap<String,CostData> submap = new HashMap<>();
+                            submap.put(cdata.getCardName(),cdata);
+                            maptest.put(cdata.getYearMonth(),submap);
+                        }
+
                         //CostData cdata = new CostData(cs.getString(0),cs.getString(3)+cs.getString(2),cost);
-                        updateFBDB(cdata);
+
                         flg = true;
                     }
                 }
             }
+
+            updateFBDB(maptest);
         }
         catch(Exception ex)
         {
@@ -222,12 +243,15 @@ public class CustomerDatabase {
         return flg;
     }
     private DatabaseReference mDatabase;
-    public void updateFBDB(CostData cd)
+    public void updateFBDB(Map<String,HashMap> maptest)
     {
         Log.d("kdml",this.getUser().getFireBase_ID());
-        mDatabase.child("cost").push().setValue(cd);
-        String cardNameconvert = cd.getCardName().replace("[","(").replace("]",")");
-        FirebaseDatabase.getInstance().getReference().child("costs").child(getUser().getFireBase_ID()).child(cardNameconvert).setValue(cd);
+        //mDatabase.child("cost").push().setValue(cd);
+        //String cardNameconvert = cd.getCardName().replace("[","(").replace("]",")");
+
+
+
+        FirebaseDatabase.getInstance().getReference().child("costsmap").child(getUser().getFireBase_ID()).setValue(maptest);
     }
 
     public boolean setTableCustomerInfo()

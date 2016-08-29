@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+import com.cardmanager.kdml.cardmanager.DTO.Cards;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 

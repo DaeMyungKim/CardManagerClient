@@ -1,4 +1,6 @@
-package com.cardmanager.kdml.cardmanager;
+package com.cardmanager.kdml.cardmanager.DTO;
+
+import com.cardmanager.kdml.cardmanager.R;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;

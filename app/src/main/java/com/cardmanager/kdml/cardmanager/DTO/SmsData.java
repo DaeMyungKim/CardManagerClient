@@ -1,4 +1,4 @@
-package com.cardmanager.kdml.cardmanager;
+package com.cardmanager.kdml.cardmanager.DTO;
 
 /**
  * Created by 김대명 on 2016-08-04.

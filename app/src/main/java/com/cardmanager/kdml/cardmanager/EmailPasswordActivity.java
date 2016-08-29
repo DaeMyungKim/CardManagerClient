@@ -3,6 +3,7 @@ package com.cardmanager.kdml.cardmanager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -10,12 +11,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cardmanager.kdml.cardmanager.DTO.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class EmailPasswordActivity extends BaseActivity implements
         View.OnClickListener {
@@ -27,6 +33,8 @@ public class EmailPasswordActivity extends BaseActivity implements
     private TextView mDetailTextView;
     private EditText mEmailField;
     private EditText mPasswordField;
+    private EditText mNameField;
+    private EditText mPhoneField;
     private boolean isLoginFlag = false;
     private DatabaseReference mDatabase;
     // [START declare_auth]
@@ -42,11 +50,18 @@ public class EmailPasswordActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_emailpassword);
 
+        TelephonyManager telephonyManager = (TelephonyManager)getBaseContext().getSystemService(getBaseContext().TELEPHONY_SERVICE);
+        String phoneNum = telephonyManager.getLine1Number();
+        phoneNum = phoneNum.replace("+82","0");
         // Views
         mStatusTextView = (TextView) findViewById(R.id.status);
         mDetailTextView = (TextView) findViewById(R.id.detail);
         mEmailField = (EditText) findViewById(R.id.field_email);
         mPasswordField = (EditText) findViewById(R.id.field_password);
+        mNameField = (EditText) findViewById(R.id.field_name);
+        mPhoneField = (EditText) findViewById(R.id.field_phone);
+
+        mPhoneField.setText(phoneNum);
         extra = new Bundle();
         intent = new Intent();
         // Buttons
@@ -67,8 +82,8 @@ public class EmailPasswordActivity extends BaseActivity implements
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                CustomerDatabase cd = CustomerDatabase.getInstance(null);
-                User appUser = cd.getUser();
+
+                //User appUser = cd.getUser();
                 if (user != null) {
                     // User is signed in
                     //Toast.makeText(getBaseContext(),"Login success",Toast.LENGTH_LONG).show();
@@ -76,19 +91,21 @@ public class EmailPasswordActivity extends BaseActivity implements
                     extra.putInt("data",1);
                     intent.putExtras(extra);
                     setResult(RESULT_OK,intent);
-                    appUser.setName(user.getEmail());
-                    appUser.setFireBase_ID( user.getUid());
-                    appUser.setEmail(user.getEmail());
-                    cd.updateUserInfo_Email_FireBaseID(appUser);
+                    readUsers(user.getUid());
+
+
                     if(isLoginFlag)
                         finish();
                 } else {
                     // User is signed out
                     //Toast.makeText(getBaseContext(),"Logout",Toast.LENGTH_LONG).show();
                     Log.d(TAG, "onAuthStateChanged:signed_out");
+                    User appUser = new User();
                     appUser.setName("Guest");
                     appUser.setFireBase_ID("");
                     appUser.setEmail("Guest");
+                    CustomerDatabase cd = CustomerDatabase.getInstance(null);
+                    cd.setUser(appUser);
                     cd.updateUserInfo_Email_FireBaseID(appUser);
                 }
                 // [START_EXCLUDE]
@@ -98,7 +115,38 @@ public class EmailPasswordActivity extends BaseActivity implements
         };
         // [END auth_state_listener]
     }
+    public void readUsers(String uid) {
 
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("users").child(uid);
+
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                try {
+                    Log.d(TAG, snapshot.toString());
+                    String key = snapshot.getKey();
+                    User value = snapshot.getValue(User.class);
+                    Log.d(TAG, "key : " + key);
+                    Log.d(TAG, value.toString());
+                    CustomerDatabase cd = CustomerDatabase.getInstance(null);
+                    cd.setUser(value);
+                    cd.updateUserInfo_Email_FireBaseID(value);
+
+
+                } catch (ClassCastException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+
+
+            }
+        });
+
+    }
     // [START on_start_add_listener]
     @Override
     public void onStart() {
@@ -116,7 +164,6 @@ public class EmailPasswordActivity extends BaseActivity implements
         }
     }
     // [END on_stop_remove_listener]
-
     private void createAccount(String email, String password) {
         Log.d(TAG, "createAccount:" + email);
         if (!validateForm()) {
@@ -131,6 +178,28 @@ public class EmailPasswordActivity extends BaseActivity implements
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
+                        FirebaseUser user = task.getResult().getUser();
+                        User appUser = new User();
+                        appUser.setName(mNameField.getText().toString());
+                        appUser.setFireBase_ID( user.getUid());
+                        appUser.setEmail(user.getEmail());
+                        appUser.setPhone(mPhoneField.getText().toString());
+                        mDatabase = FirebaseDatabase.getInstance().getReference();
+                        mDatabase.child("users").child(user.getUid()).setValue(appUser);
+                        mDatabase.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                User value = dataSnapshot.getValue(User.class);
+                                CustomerDatabase cd = CustomerDatabase.getInstance(null);
+                                cd.setUser(appUser);
+                                cd.updateUserInfo_Email_FireBaseID(appUser);
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
 
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
@@ -207,6 +276,22 @@ public class EmailPasswordActivity extends BaseActivity implements
             mPasswordField.setError(null);
         }
 
+        String name = mNameField.getText().toString();
+        if (TextUtils.isEmpty(name)) {
+            mNameField.setError("Required.");
+            valid = false;
+        } else {
+            mNameField.setError(null);
+        }
+
+        String phone = mPhoneField.getText().toString();
+        if (TextUtils.isEmpty(phone)) {
+            mPhoneField.setError("Required.");
+            valid = false;
+        } else {
+            mPhoneField.setError(null);
+        }
+
         return valid;
     }
 
@@ -218,6 +303,7 @@ public class EmailPasswordActivity extends BaseActivity implements
 
             findViewById(R.id.email_password_buttons).setVisibility(View.GONE);
             findViewById(R.id.email_password_fields).setVisibility(View.GONE);
+            findViewById(R.id.email_password_fields2).setVisibility(View.GONE);
             findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
         } else {
             mStatusTextView.setText(R.string.signed_out);
@@ -225,6 +311,7 @@ public class EmailPasswordActivity extends BaseActivity implements
 
             findViewById(R.id.email_password_buttons).setVisibility(View.VISIBLE);
             findViewById(R.id.email_password_fields).setVisibility(View.VISIBLE);
+            findViewById(R.id.email_password_fields2).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_out_button).setVisibility(View.GONE);
         }
     }
