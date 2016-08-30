@@ -178,28 +178,6 @@ public class EmailPasswordActivity extends BaseActivity implements
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
-                        FirebaseUser user = task.getResult().getUser();
-                        User appUser = new User();
-                        appUser.setName(mNameField.getText().toString());
-                        appUser.setFireBase_ID( user.getUid());
-                        appUser.setEmail(user.getEmail());
-                        appUser.setPhone(mPhoneField.getText().toString());
-                        mDatabase = FirebaseDatabase.getInstance().getReference();
-                        mDatabase.child("users").child(user.getUid()).setValue(appUser);
-                        mDatabase.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                User value = dataSnapshot.getValue(User.class);
-                                CustomerDatabase cd = CustomerDatabase.getInstance(null);
-                                cd.setUser(appUser);
-                                cd.updateUserInfo_Email_FireBaseID(appUser);
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
 
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
@@ -207,6 +185,31 @@ public class EmailPasswordActivity extends BaseActivity implements
                         if (!task.isSuccessful()) {
                             Toast.makeText(EmailPasswordActivity.this, R.string.auth_failed,
                                     Toast.LENGTH_SHORT).show();
+                        }
+                        else
+                        {
+                            FirebaseUser user = task.getResult().getUser();
+                            User appUser = new User();
+                            appUser.setName(mNameField.getText().toString());
+                            appUser.setFireBase_ID( user.getUid());
+                            appUser.setEmail(user.getEmail());
+                            appUser.setPhone(mPhoneField.getText().toString());
+                            mDatabase = FirebaseDatabase.getInstance().getReference();
+                            mDatabase.child("users").child(user.getUid()).setValue(appUser);
+                            mDatabase.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    User value = dataSnapshot.getValue(User.class);
+                                    CustomerDatabase cd = CustomerDatabase.getInstance(null);
+                                    cd.setUser(appUser);
+                                    cd.updateUserInfo_Email_FireBaseID(appUser);
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
                         }
 
                         // [START_EXCLUDE]

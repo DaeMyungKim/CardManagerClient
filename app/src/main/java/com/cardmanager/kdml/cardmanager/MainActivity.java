@@ -84,6 +84,11 @@ public class MainActivity extends AppCompatActivity implements StatisticFragment
     @Override
     protected void onResume() {
         super.onResume();
+        FirebaseAuth  mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if(user == null)
+            finish();
+
         cd = CustomerDatabase.getInstance(this);
         if(cd.setTableCustomerInfo() && cd.setCardInfo())
             selectData();

@@ -250,8 +250,8 @@ public class CustomerDatabase {
         //String cardNameconvert = cd.getCardName().replace("[","(").replace("]",")");
 
 
-
-        FirebaseDatabase.getInstance().getReference().child("costsmap").child(getUser().getFireBase_ID()).setValue(maptest);
+        if(getUser().getFireBase_ID().length() > 0)
+            FirebaseDatabase.getInstance().getReference().child("costsmap").child(getUser().getFireBase_ID()).setValue(maptest);
     }
 
     public boolean setTableCustomerInfo()
